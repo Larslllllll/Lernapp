@@ -1,0 +1,240 @@
+"""Lern-Engine: Kartenauswahl, Antwortpruefung, Runden.
+
+Enthaelt bewusst KEINE GUI-Aufrufe. Statt Widgets zu veraendern, liefert die
+Engine Zustaende und Ergebnisse zurueck; die Oberflaeche entscheidet, wie sie
+das darstellt.
+
+Der Zufall wird injiziert (`rng`), damit die Kartenauswahl reproduzierbar
+testbar ist.
+"""
+from __future__ import annotations
+
+import random
+from dataclasses import dataclass, field
+
+from . import rules
+from .cards import NormalCard, TripleCard, gruppiere_pakete, lerneinheiten
+from .progress import SetProgress
+
+VORWAERTS = "→"    # Pfeil rechts
+RUECKWAERTS = "←"  # Pfeil links
+GEMISCHT = "⇄"     # Pfeile gemischt
+
+_BIAS_MIN, _BIAS_MAX = 0.75, 0.85
+
+
+@dataclass
+class Frage:
+    """Was dem Lernenden gerade gezeigt wird."""
+
+    card: NormalCard | TripleCard
+    rueckwaerts: bool = False
+
+    @property
+    def ist_triple(self) -> bool:
+        return self.card.is_triple
+
+    @property
+    def anzeige(self) -> str:
+        if self.card.is_triple:
+            return self.card.sichtbar
+        return self.card.zeigt(self.rueckwaerts)
+
+
+@dataclass
+class Ergebnis:
+    """Was eine Antwort bewirkt hat."""
+
+    richtig: bool
+    xp: int = 0
+    level_up: bool = False
+    combo: int = 0
+    multiplikator: float = 1.0
+    loesung: str = ""
+    weitere: list[str] = field(default_factory=list)
+
+
+class SessionZustand:
+    LAEUFT = "laeuft"
+    RUNDE_FERTIG = "runde_fertig"
+    FERTIG = "fertig"
+
+
+class LearningSession:
+    """Eine Lernsitzung ueber die Karten eines Lernsets."""
+
+    def __init__(
+        self,
+        karten: list,
+        fortschritt: SetProgress | None = None,
+        rng: random.Random | None = None,
+        richtung: str = GEMISCHT,
+    ) -> None:
+        # Nach Schluessel deduplizieren. Der Fortschritt ist historisch nach der
+        # Frage-Zeichenkette indiziert; zwei Karten mit gleicher Frage waeren
+        # derselbe Eintrag und wuerden sonst doppelt gezaehlt.
+        self._nach_key: dict[str, NormalCard | TripleCard] = {}
+        for k in karten:
+            self._nach_key.setdefault(k.key, k)
+        self.karten = list(self._nach_key.values())
+
+        self.fortschritt = fortschritt or SetProgress()
+        self.rng = rng or random.Random()
+        self.richtung = richtung
+        self.runde = 1
+
+        self._pakete = gruppiere_pakete(self.karten)
+        self._paket_keys = {
+            k.key: [c.key for c in self._pakete[k.package_key]]
+            for k in self.karten
+            if k.is_triple
+        }
+        self._bias = self.rng.uniform(_BIAS_MIN, _BIAS_MAX)
+
+        for k in self.karten:
+            self.fortschritt.streaks.setdefault(k.key, 0)
+
+        self.aktuelle_frage: Frage | None = None
+
+    # -- Zustand --------------------------------------------------------------
+
+    @property
+    def offene_keys(self) -> list[str]:
+        return [k.key for k in self.karten if self.fortschritt.streaks.get(k.key, 0) < 1]
+
+    @property
+    def zustand(self) -> str:
+        if self.offene_keys:
+            return SessionZustand.LAEUFT
+        if self._fehlerkarten():
+            return SessionZustand.RUNDE_FERTIG
+        return SessionZustand.FERTIG
+
+    def fortschritt_zaehler(self) -> tuple[int, int]:
+        """(gelernt, gesamt) in Lerneinheiten - ein Triple-Paket zaehlt als eins.
+
+        Diese Zahl ist die einzige Wahrheit. Sidebar, Fortschrittsbalken und
+        Statistik muessen alle sie verwenden.
+        """
+        streaks = self.fortschritt.streaks
+        gesamt = lerneinheiten(self.karten)
+        fertig = sum(
+            1 for k in self.karten if not k.is_triple and streaks.get(k.key, 0) >= 1
+        )
+        for gruppe in self._pakete.values():
+            if all(streaks.get(c.key, 0) >= 1 for c in gruppe):
+                fertig += 1
+        return fertig, gesamt
+
+    def _streak_gruppe(self, card) -> list[str]:
+        """Alle Streak-Schluessel, die bei einem Fehler gemeinsam fallen."""
+        return self._paket_keys.get(card.key, [card.key])
+
+    def _fehlerkarten(self) -> set[str]:
+        return {
+            q
+            for q, n in self.fortschritt.round_errors.items()
+            if n > 0 and q in self.fortschritt.streaks
+        }
+
+    # -- Ablauf ---------------------------------------------------------------
+
+    def naechste_frage(self) -> Frage | None:
+        """Waehlt die naechste Karte. None heisst: Runde vorbei."""
+        offen = self.offene_keys
+        if not offen:
+            self.aktuelle_frage = None
+            return None
+
+        gewichte = [self.fortschritt.gewicht(q) for q in offen]
+        key = self.rng.choices(offen, weights=gewichte, k=1)[0]
+        card = self._nach_key[key]
+
+        if card.is_triple:
+            rueckwaerts = False
+        elif self.richtung == GEMISCHT:
+            rueckwaerts = self.rng.random() >= self._bias
+        else:
+            rueckwaerts = self.richtung == RUECKWAERTS
+
+        self.aktuelle_frage = Frage(card=card, rueckwaerts=rueckwaerts)
+        return self.aktuelle_frage
+
+    def antworte(self, eingabe) -> Ergebnis:
+        """Prueft die Antwort auf die aktuelle Frage und verbucht sie.
+
+        `eingabe` ist ein String bei normalen Karten und eine Liste mit zwei
+        Strings bei Triple-Karten.
+        """
+        if self.aktuelle_frage is None:
+            raise RuntimeError("Es liegt keine aktive Frage vor")
+
+        frage = self.aktuelle_frage
+        card = frage.card
+        gruppe = self._streak_gruppe(card)
+
+        if card.is_triple:
+            eingaben = list(eingabe) if isinstance(eingabe, (list, tuple)) else [eingabe]
+            ok = card.pruefe(eingaben)
+            loesung = card.volle_loesung()
+            weitere: list[str] = []
+        else:
+            text = eingabe if isinstance(eingabe, str) else str(eingabe)
+            ok = card.pruefe(text, frage.rueckwaerts)
+            loesung = card.erwartet(frage.rueckwaerts)
+            weitere = card.weitere_loesungen(text, frage.rueckwaerts) if ok else []
+
+        if ok:
+            # Richtig zaehlt nur fuer diese eine Karte - beim Triple muessen
+            # alle drei Formen einzeln sitzen.
+            gewinn, level_up = self.fortschritt.richtig([card.key])
+            return Ergebnis(
+                richtig=True,
+                xp=gewinn,
+                level_up=level_up,
+                combo=self.fortschritt.current_combo,
+                multiplikator=rules.combo_mul(self.fortschritt.current_combo),
+                loesung=loesung,
+                weitere=weitere,
+            )
+
+        # Falsch setzt das ganze Paket zurueck.
+        self.fortschritt.falsch(gruppe)
+        return Ergebnis(richtig=False, combo=0, loesung=loesung)
+
+    def naechste_runde(self) -> bool:
+        """Startet die Wiederholungsrunde. False heisst: Sitzung fertig."""
+        fehler = self._fehlerkarten()
+        if not fehler:
+            return False
+        for key in fehler:
+            card = self._nach_key.get(key)
+            if card is None:
+                continue
+            for k in self._streak_gruppe(card):
+                self.fortschritt.streaks[k] = 0
+        self.fortschritt.neue_runde()
+        self.runde += 1
+        return True
+
+    def neustart(self) -> None:
+        self.fortschritt.zuruecksetzen()
+        self.runde = 1
+        self.aktuelle_frage = None
+        self._bias = self.rng.uniform(_BIAS_MIN, _BIAS_MAX)
+
+    # -- Statistik ------------------------------------------------------------
+
+    def statistik(self) -> dict:
+        p = self.fortschritt
+        schwerste = sorted(p.total_errors.items(), key=lambda x: x[1], reverse=True)
+        return {
+            "accuracy": p.accuracy,
+            "richtig": p.total_correct,
+            "falsch": p.total_wrong,
+            "xp": p.xp,
+            "level": p.level,
+            "best_combo": p.best_combo,
+            "runden": self.runde,
+            "schwerste_karten": schwerste[:4],
+        }

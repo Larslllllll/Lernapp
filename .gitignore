@@ -1,0 +1,26 @@
+# Build-Artefakte
+build/
+dist/
+*.spec.bak
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtualenv
+.venv/
+venv/
+
+# Grosse Archive / Binaries
+*.zip
+*.exe
+
+# Werkzeug-Output
+graphify-out/cache/
+graphify-out/.graphify_*
+
+# Lokale Nutzerdaten / Secrets
+.env
+.env.*
+*.local.json

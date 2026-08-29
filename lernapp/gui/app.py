@@ -17,9 +17,20 @@ from .bridge.learning_viewmodel import LearningViewModel
 from .bridge.sets_viewmodel import SetsViewModel
 from .bridge.settings_viewmodel import SettingsViewModel
 
-QML_DIR = Path(__file__).resolve().parent / "qml"
-PROJEKT = Path(__file__).resolve().parent.parent.parent
-ICON = PROJEKT / "ico.ico"
+def _ressourcen() -> tuple[Path, Path]:
+    """(qml-Verzeichnis, Icon-Datei).
+
+    Im PyInstaller-Bundle liegen die Ressourcen unter sys._MEIPASS, nicht
+    neben der .py-Datei - die steckt dann im Archiv.
+    """
+    if getattr(sys, "frozen", False):
+        basis = Path(getattr(sys, "_MEIPASS", Path(sys.executable).parent))
+        return basis / "qml", basis / "ico.ico"
+    hier = Path(__file__).resolve().parent
+    return hier / "qml", hier.parent.parent / "ico.ico"
+
+
+QML_DIR, ICON = _ressourcen()
 
 
 def _verdrahten(sets: SetsViewModel, lernen: LearningViewModel,

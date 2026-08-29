@@ -1,6 +1,10 @@
 # Produktive Abhaengigkeiten
-PySide6==6.11.2
+#
+# Bewusst PySide6-Essentials statt PySide6: das Metapaket zieht PySide6-Addons
+# mit, worin WebEngine (194 MB), Qt3D, Charts und Multimedia stecken - nichts
+# davon nutzt die App. So kann PyInstaller sie gar nicht erst einpacken.
+PySide6-Essentials==6.11.2
 
 # Waehrend der Migration: alte Oberflaeche bleibt als Referenz lauffähig.
-# Entfaellt, sobald die Qt-App Feature-Paritaet erreicht hat.
+# Entfaellt, sobald Qt-Version und Packaging bestaetigt sind.
 customtkinter==5.2.2

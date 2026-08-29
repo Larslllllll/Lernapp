@@ -22,6 +22,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from ..core.import_export import als_export, aus_export, dateiname_fuer
 from ..core.seed_data import standard_data
 from . import paths
 from .migrations import migriere_data, migriere_progress
@@ -121,3 +122,32 @@ def save_prog(fortschritt: dict, pfad: Path | None = None) -> None:
 
 def neues_lernset(name: str, items: list[dict] | None = None) -> dict:
     return {"id": str(uuid.uuid4()), "name": name, "items": list(items or [])}
+
+
+# -- Austauschdateien ---------------------------------------------------------
+
+def exportiere_lernset(name: str, items: list[dict], ziel: Path,
+                       app_version: str = "") -> Path:
+    """Schreibt eine .lernset.json.
+
+    Ist `ziel` ein Verzeichnis, wird der Dateiname aus dem Lernset-Namen
+    gebildet. Geschrieben wird atomar wie alle anderen Dateien auch.
+    """
+    if ziel.is_dir():
+        ziel = ziel / dateiname_fuer(name)
+    _schreibe_json_atomar(ziel, als_export(name, items, app_version))
+    return ziel
+
+
+def importiere_lernset(pfad: Path) -> tuple[str, list[dict]]:
+    """Liest eine .lernset.json. Wirft ValueError bei unbrauchbarem Inhalt."""
+    if not pfad.exists():
+        raise ValueError(f"Datei nicht gefunden: {pfad.name}")
+    try:
+        with pfad.open("r", encoding="utf-8") as f:
+            roh = json.load(f)
+    except json.JSONDecodeError as fehler:
+        raise ValueError(f"Datei ist kein gueltiges JSON: {fehler.msg}") from fehler
+    except OSError as fehler:
+        raise ValueError(f"Datei nicht lesbar: {fehler}") from fehler
+    return aus_export(roh)

@@ -7,18 +7,30 @@ der Lernbildschirm (LearningSession.fortschritt_zaehler).
 from __future__ import annotations
 
 import uuid
+from pathlib import Path
 
-from PySide6.QtCore import Property, QObject, Signal, Slot
+from PySide6.QtCore import Property, QObject, QUrl, Signal, Slot
 
+from lernapp import __version__
 from lernapp.core.cards import TripleCard
+from lernapp.core.import_export import dateiname_fuer, parse_text
+from lernapp.storage import local_storage as store
 
 from .app_state import AppState
+
+
+def _pfad_aus(url: str) -> Path:
+    """QML liefert file:///C:/... - daraus einen echten Pfad machen."""
+    if url.startswith("file:"):
+        return Path(QUrl(url).toLocalFile())
+    return Path(url)
 
 
 class SetsViewModel(QObject):
     baumGeaendert = Signal()
     lernsetGewaehlt = Signal(str)
     fehler = Signal(str)
+    hinweis = Signal(str)
 
     def __init__(self, state: AppState) -> None:
         super().__init__()
@@ -194,6 +206,65 @@ class SetsViewModel(QObject):
             self.fehler.emit("Bitte alle drei Formen ausfüllen")
             return []
         return [TripleCard(forms=formen, revealed=i).legacy_item() for i in (0, 1, 2)]
+
+    # -- Import und Export ----------------------------------------------------
+
+    @Slot(str, result=str)
+    def standardDateiname(self, ls_id: str) -> str:
+        _ordner, ls = self._state.finde_lernset(ls_id)
+        return dateiname_fuer(ls["name"]) if ls else "Lernset.lernset.json"
+
+    @Slot(str, str, result=bool)
+    def exportiereLernset(self, ls_id: str, ziel_url: str) -> bool:
+        _ordner, ls = self._state.finde_lernset(ls_id)
+        if ls is None:
+            self.fehler.emit("Lernset nicht gefunden")
+            return False
+        try:
+            ziel = store.exportiere_lernset(
+                ls["name"], ls["items"], _pfad_aus(ziel_url), __version__)
+        except (OSError, ValueError) as problem:
+            self.fehler.emit(f"Export fehlgeschlagen: {problem}")
+            return False
+        self.hinweis.emit(f"Exportiert nach {ziel.name}")
+        return True
+
+    @Slot(str, str, result=str)
+    def importiereLernset(self, quell_url: str, ordner: str) -> str:
+        try:
+            name, items = store.importiere_lernset(_pfad_aus(quell_url))
+        except ValueError as problem:
+            self.fehler.emit(str(problem))
+            return ""
+        ziel = ordner if ordner in self._state.folders else self._erster_ordner()
+        neu = {"id": str(uuid.uuid4()), "name": name, "items": items}
+        self._state.folders[ziel]["lernsets"].append(neu)
+        self._state.save_data()
+        self.baumGeaendert.emit()
+        self.hinweis.emit(f"„{name}“ importiert · {len(items)} Karten")
+        return neu["id"]
+
+    @Slot(str, result="QVariantMap")
+    def textVorschau(self, text: str) -> dict:
+        """Zeigt, was ein Textimport ergaebe - ohne etwas zu speichern."""
+        ergebnis = parse_text(text)
+        return {
+            "ok": ergebnis.ok,
+            "zusammenfassung": ergebnis.zusammenfassung(),
+            "normale": ergebnis.normale,
+            "pakete": ergebnis.pakete,
+            "einheiten": ergebnis.einheiten,
+            "trenner": ergebnis.trenner,
+            "probleme": [
+                {"zeile": p.zeile, "text": p.text, "grund": p.grund}
+                for p in ergebnis.probleme[:8]
+            ],
+        }
+
+    @Slot(str, result="QVariantList")
+    def textKarten(self, text: str) -> list:
+        """Die Karten eines Textimports - fuer den Lernset-Dialog."""
+        return parse_text(text).items
 
     # -- Hilfen ---------------------------------------------------------------
 

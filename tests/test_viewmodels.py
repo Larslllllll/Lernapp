@@ -394,3 +394,117 @@ def test_windows_kuerzel_sind_vollstaendig():
     from lernapp.platform_services.windows import WindowsDienste
 
     assert set(WindowsDienste().tastenkuerzel()) == set(AKTIONEN)
+
+
+# -- Import und Export --------------------------------------------------------
+
+def test_export_datei_wird_geschrieben(vms, tmp_path):
+    _e, _l, sets = vms
+    hinweise = []
+    sets.hinweis.connect(hinweise.append)
+    ziel = tmp_path / "export.lernset.json"
+    assert sets.exportiereLernset("set-a", str(ziel)) is True
+    assert ziel.exists()
+    assert hinweise and "export.lernset.json" in hinweise[0]
+
+
+def test_export_von_unbekanntem_lernset_meldet_fehler(vms, tmp_path):
+    _e, _l, sets = vms
+    fehler = []
+    sets.fehler.connect(fehler.append)
+    assert sets.exportiereLernset("gibtsnicht", str(tmp_path / "x.json")) is False
+    assert fehler
+
+
+def test_geteiltes_lernset_landet_in_einer_anderen_installation(vms, tmp_path):
+    """Der Weg, der beim Teilen mit Klassenkameraden zaehlt."""
+    _e, _l, sets = vms
+    datei = tmp_path / "geteilt.lernset.json"
+    assert sets.exportiereLernset("set-b", str(datei)) is True
+
+    # Zweite, voellig getrennte Installation
+    fremd_basis = tmp_path / "andere_installation"
+    fremd_basis.mkdir()
+    fremd = SetsViewModel(AppState(fremd_basis))
+    ordner_vorher = fremd.ordnerNamen[0]
+
+    neu_id = fremd.importiereLernset(str(datei), ordner_vorher)
+    assert neu_id != ""
+    geladen = fremd.lernsetLaden(neu_id)
+    assert geladen["name"] == "Verben"
+    assert len(geladen["items"]) == 4
+    assert {"q": "___ had to ___", "a": "must, had to"} in geladen["items"]
+
+
+def test_import_bringt_keinen_fremden_fortschritt_mit(vms, tmp_path, state):
+    _e, lernen, sets = vms
+    sets.waehle("set-a")
+    lernen.pruefe([loesung_fuer(lernen)])
+    datei = tmp_path / "mit_fortschritt.lernset.json"
+    sets.exportiereLernset("set-a", str(datei))
+
+    inhalt = datei.read_text(encoding="utf-8")
+    assert "xp" not in inhalt
+    assert "streaks" not in inhalt
+
+    fremd_basis = tmp_path / "empfaenger"
+    fremd_basis.mkdir()
+    fremd_state = AppState(fremd_basis)
+    fremd = SetsViewModel(fremd_state)
+    neu_id = fremd.importiereLernset(str(datei), fremd.ordnerNamen[0])
+    assert fremd_state.progress.get(neu_id) is None
+
+
+def test_import_kaputter_datei_meldet_klaren_fehler(vms, tmp_path):
+    _e, _l, sets = vms
+    fehler = []
+    sets.fehler.connect(fehler.append)
+
+    kaputt = tmp_path / "kaputt.lernset.json"
+    kaputt.write_text("{das ist kein json", encoding="utf-8")
+    assert sets.importiereLernset(str(kaputt), "Franzoesisch") == ""
+
+    leer = tmp_path / "leer.lernset.json"
+    leer.write_text('{"items": []}', encoding="utf-8")
+    assert sets.importiereLernset(str(leer), "Franzoesisch") == ""
+
+    assert sets.importiereLernset(str(tmp_path / "fehlt.json"), "Franzoesisch") == ""
+    assert len(fehler) == 3
+
+
+def test_import_akzeptiert_file_url_aus_qml(vms, tmp_path):
+    _e, _l, sets = vms
+    datei = tmp_path / "via_url.lernset.json"
+    sets.exportiereLernset("set-a", str(datei))
+    url = datei.as_uri()
+    assert url.startswith("file:")
+    assert sets.importiereLernset(url, "Franzoesisch") != ""
+
+
+def test_textvorschau_ohne_zu_speichern(vms):
+    _e, _l, sets = vms
+    vorher = len(sets.ordner[0]["lernsets"])
+    vorschau = sets.textVorschau("go;went;gone\nla maison;das haus\nkaputt")
+    assert vorschau["ok"] is True
+    assert vorschau["pakete"] == 1
+    assert vorschau["normale"] == 1
+    assert vorschau["einheiten"] == 2
+    assert len(vorschau["probleme"]) == 1
+    assert len(sets.ordner[0]["lernsets"]) == vorher, "Vorschau speichert nichts"
+
+
+def test_textkarten_erzeugen_gueltige_pakete(vms):
+    _e, _l, sets = vms
+    karten = sets.textKarten("must;had to;had to")
+    neu = sets.lernsetAnlegenIn("Franzoesisch", "Aus Text", karten)
+    assert neu != ""
+    eintrag = next(o for o in sets.ordner if o["name"] == "Franzoesisch")["lernsets"]
+    aus_text = next(ls for ls in eintrag if ls["id"] == neu)
+    assert aus_text["karten"] == 1, "drei Karten, aber eine Lerneinheit"
+
+
+def test_standarddateiname_ist_plattformsicher(vms):
+    _e, _l, sets = vms
+    name = sets.standardDateiname("set-a")
+    assert name.endswith(".lernset.json")
+    assert not any(z in name for z in r'<>:"/\|?*')

@@ -237,6 +237,13 @@ Dialog {
                 color: Theme.textSecondary
                 font.pixelSize: Theme.schriftS
             }
+            PrimaryButton {
+                text: "Aus Text einfügen …"
+                sekundaer: true
+                implicitWidth: 160
+                implicitHeight: 30
+                onClicked: textImport.oeffnen()
+            }
         }
 
         ListView {
@@ -307,6 +314,140 @@ Dialog {
                 color: Theme.textDisabled
                 font.pixelSize: Theme.schriftS
             }
+        }
+    }
+
+    Dialog {
+        id: textImport
+        anchors.centerIn: Overlay.overlay
+        modal: true
+        width: 560
+        height: 480
+        title: "Karten aus Text einfügen"
+        closePolicy: Popup.CloseOnEscape
+
+        function oeffnen() {
+            quelle.text = ""
+            open()
+            quelle.forceActiveFocus()
+        }
+
+        readonly property var vorschau: sets.textVorschau(quelle.text)
+
+        background: Rectangle {
+            color: Theme.background
+            radius: Theme.radiusGross
+            border.color: Theme.border
+            border.width: 1
+        }
+        header: Text {
+            text: textImport.title
+            color: Theme.textPrimary
+            font.pixelSize: Theme.schriftL
+            font.bold: true
+            padding: Theme.abstandM
+        }
+
+        contentItem: ColumnLayout {
+            spacing: Theme.abstandS
+
+            Text {
+                Layout.fillWidth: true
+                text: "Eine Zeile je Karte. Zwei Felder ergeben eine Karte, drei Felder "
+                      + "ein Verbpaket.
+Trennzeichen: Tabulator, Semikolon oder Komma."
+                color: Theme.textSecondary
+                font.pixelSize: Theme.schriftXs
+                wrapMode: Text.WordWrap
+            }
+
+            ScrollView {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                clip: true
+                TextArea {
+                    id: quelle
+                    color: Theme.textPrimary
+                    placeholderTextColor: Theme.textDisabled
+                    placeholderText: "être;sein
+avoir;haben
+go;went;gone"
+                    font.pixelSize: Theme.schriftS
+                    selectByMouse: true
+                    wrapMode: TextArea.NoWrap
+                    background: Rectangle {
+                        color: Theme.surface
+                        radius: Theme.radiusMittel
+                        border.width: quelle.activeFocus ? 2 : 1
+                        border.color: quelle.activeFocus ? Theme.primary : Theme.border
+                    }
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: vorschauSpalte.implicitHeight + 2 * Theme.abstandS
+                radius: Theme.radiusMittel
+                color: Theme.surface
+                border.width: 1
+                border.color: textImport.vorschau.probleme.length > 0
+                              ? Theme.warning : Theme.border
+
+                ColumnLayout {
+                    id: vorschauSpalte
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.margins: Theme.abstandS
+                    spacing: 2
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: quelle.text.trim() === ""
+                              ? "Vorschau erscheint beim Tippen"
+                              : textImport.vorschau.zusammenfassung
+                        color: textImport.vorschau.ok ? Theme.success : Theme.textSecondary
+                        font.pixelSize: Theme.schriftS
+                        font.bold: textImport.vorschau.ok
+                    }
+                    Repeater {
+                        model: textImport.vorschau.probleme
+                        delegate: Text {
+                            required property var modelData
+                            Layout.fillWidth: true
+                            text: "Zeile " + modelData.zeile + ": " + modelData.grund
+                                  + "  —  " + modelData.text
+                            color: Theme.warning
+                            font.pixelSize: Theme.schriftXs
+                            elide: Text.ElideRight
+                        }
+                    }
+                }
+            }
+        }
+
+        footer: RowLayout {
+            spacing: Theme.abstandS
+            Item { Layout.fillWidth: true }
+            PrimaryButton {
+                text: "Abbrechen"
+                sekundaer: true
+                implicitWidth: 130
+                onClicked: textImport.close()
+            }
+            PrimaryButton {
+                text: "Übernehmen"
+                implicitWidth: 150
+                enabled: textImport.vorschau.ok
+                onClicked: {
+                    var neu = sets.textKarten(quelle.text)
+                    for (var i = 0; i < neu.length; i++)
+                        karten.append({ q: neu[i].q, a: neu[i].a })
+                    textImport.close()
+                    kartenListe.positionViewAtEnd()
+                }
+            }
+            Item { width: Theme.abstandM }
         }
     }
 

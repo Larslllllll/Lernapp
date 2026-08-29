@@ -92,12 +92,18 @@ ApplicationWindow {
     // Fehlermeldungen aus den ViewModels sichtbar machen.
     Connections {
         target: sets
-        function onFehler(text) { hinweis.zeige(text) }
+        function onFehler(text) { hinweis.zeige(text, true) }
+        function onHinweis(text) { hinweis.zeige(text, false) }
     }
 
     Rectangle {
         id: hinweis
-        function zeige(text) { hinweisText.text = text; einblenden.restart() }
+        property bool istFehler: true
+        function zeige(text, fehler) {
+            hinweisText.text = text
+            istFehler = fehler === undefined ? true : fehler
+            einblenden.restart()
+        }
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
@@ -107,7 +113,7 @@ ApplicationWindow {
         radius: Theme.radiusRund
         color: Theme.surfaceElevated
         border.width: 1
-        border.color: Theme.error
+        border.color: hinweis.istFehler ? Theme.error : Theme.success
         opacity: 0
 
         Text {

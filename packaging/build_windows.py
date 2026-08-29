@@ -34,6 +34,7 @@ ERWARTETE_QT_MODULE = [
     "Qt6Core.dll", "Qt6Gui.dll", "Qt6Qml.dll", "Qt6Quick.dll",
     "Qt6QuickControls2.dll", "Qt6QuickTemplates2.dll", "Qt6QuickLayouts.dll",
     "Qt6QmlModels.dll", "Qt6Network.dll", "Qt6OpenGL.dll", "Qt6Svg.dll",
+    "Qt6QuickDialogs2.dll", "Qt6QuickDialogs2QuickImpl.dll",
 ]
 
 # Diese duerfen NIE auftauchen - sie stecken in PySide6-Addons.

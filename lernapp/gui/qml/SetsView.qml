@@ -3,6 +3,7 @@
 // Kontextmenue erreichbar.
 import QtQuick
 import QtQuick.Controls.Basic
+import QtQuick.Dialogs
 import QtQuick.Layouts
 import theme
 import "components"
@@ -232,12 +233,25 @@ Rectangle {
             }
         }
 
-        PrimaryButton {
+        RowLayout {
             Layout.fillWidth: true
-            implicitHeight: 36
-            sekundaer: true
-            text: "+ Ordner"
-            onClicked: ordnerDialog.open()
+            spacing: Theme.abstandXs
+            PrimaryButton {
+                Layout.fillWidth: true
+                implicitWidth: 0
+                implicitHeight: 36
+                sekundaer: true
+                text: "+ Ordner"
+                onClicked: ordnerDialog.open()
+            }
+            PrimaryButton {
+                Layout.fillWidth: true
+                implicitWidth: 0
+                implicitHeight: 36
+                sekundaer: true
+                text: "Import"
+                onClicked: importDialog.open()
+            }
         }
     }
 
@@ -251,6 +265,15 @@ Rectangle {
         MenuItem {
             text: "Bearbeiten"
             onTriggered: leiste.bearbeiten(kontext.lernsetId)
+        }
+        MenuItem {
+            text: "Exportieren …"
+            onTriggered: {
+                exportDialog.lernsetId = kontext.lernsetId
+                exportDialog.selectedFile = exportDialog.currentFolder
+                                            + "/" + sets.standardDateiname(kontext.lernsetId)
+                exportDialog.open()
+            }
         }
         Menu {
             title: "Verschieben nach"
@@ -277,6 +300,28 @@ Rectangle {
     }
 
     // -- Dialoge --------------------------------------------------------------
+    FileDialog {
+        id: exportDialog
+        property string lernsetId: ""
+        title: "Lernset exportieren"
+        fileMode: FileDialog.SaveFile
+        nameFilters: ["LernApp-Lernset (*.lernset.json)", "Alle Dateien (*)"]
+        defaultSuffix: "json"
+        onAccepted: sets.exportiereLernset(exportDialog.lernsetId, selectedFile.toString())
+    }
+
+    FileDialog {
+        id: importDialog
+        title: "Lernset importieren"
+        fileMode: FileDialog.OpenFile
+        nameFilters: ["LernApp-Lernset (*.lernset.json)", "JSON (*.json)", "Alle Dateien (*)"]
+        onAccepted: {
+            var ordner = sets.ordnerNamen.length > 0 ? sets.ordnerNamen[0] : ""
+            var id = sets.importiereLernset(selectedFile.toString(), ordner)
+            if (id !== "") sets.waehle(id)
+        }
+    }
+
     Dialog {
         id: ordnerDialog
         anchors.centerIn: Overlay.overlay

@@ -30,7 +30,15 @@ def plattform_datenverzeichnis() -> Path:
 
 
 def datenverzeichnis() -> Path:
-    """Aktiv genutztes Verzeichnis."""
+    """Aktiv genutztes Verzeichnis.
+
+    LERNAPP_DATA_DIR lenkt den Ablageort um - gedacht fuer Entwicklung und
+    Tests, damit nie versehentlich gegen die echten Nutzerdaten gearbeitet
+    wird. Ohne die Variable bleibt alles beim historischen Ort.
+    """
+    override = os.environ.get("LERNAPP_DATA_DIR")
+    if override:
+        return Path(override)
     return LEGACY_DIR
 
 

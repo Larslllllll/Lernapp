@@ -1,0 +1,322 @@
+// Seitenleiste: Ordner und Lernsets.
+// Drag & Drop ist eine Bequemlichkeit - jede Aktion ist auch ueber das
+// Kontextmenue erreichbar.
+import QtQuick
+import QtQuick.Controls.Basic
+import QtQuick.Layouts
+import theme
+import "components"
+
+Rectangle {
+    id: leiste
+    color: Theme.surface
+
+    signal bearbeiten(string lernsetId)
+    signal neuAnlegen(string ordner)
+
+    property string ziehtId: ""
+    property string zielOrdner: ""
+
+    ColumnLayout {
+        anchors.fill: parent
+        anchors.margins: Theme.abstandS
+        spacing: Theme.abstandS
+
+        RowLayout {
+            Layout.fillWidth: true
+            Text {
+                Layout.fillWidth: true
+                text: "Lernsets"
+                color: Theme.textPrimary
+                font.pixelSize: Theme.schriftL
+                font.bold: true
+                leftPadding: Theme.abstandXs
+            }
+            ToolButton {
+                implicitWidth: 34; implicitHeight: 34
+                onClicked: einstellungen.themeUmschalten()
+                ToolTip.visible: hovered
+                ToolTip.text: einstellungen.dark ? "Helles Design" : "Dunkles Design"
+                background: Rectangle {
+                    radius: Theme.radiusKlein
+                    color: parent.hovered ? Theme.surfaceElevated : "transparent"
+                }
+                contentItem: Text {
+                    text: einstellungen.dark ? "☀" : "☾"
+                    color: Theme.textSecondary
+                    font.pixelSize: 16
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+            }
+        }
+
+        ScrollView {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            clip: true
+
+            ColumnLayout {
+                width: leiste.width - 2 * Theme.abstandS
+                spacing: Theme.abstandXs
+
+                Repeater {
+                    model: sets.ordner
+                    delegate: Rectangle {
+                        id: ordnerBlock
+                        required property var modelData
+                        readonly property string ordnerName: modelData.name
+
+                        Layout.fillWidth: true
+                        implicitHeight: ordnerSpalte.implicitHeight + 2 * Theme.abstandXs
+                        radius: Theme.radiusMittel
+                        color: leiste.zielOrdner === ordnerName && leiste.ziehtId !== ""
+                               ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.18)
+                               : Theme.surfaceElevated
+                        border.width: 1
+                        border.color: leiste.zielOrdner === ordnerName && leiste.ziehtId !== ""
+                                      ? Theme.primary : "transparent"
+                        Behavior on color { ColorAnimation { duration: Theme.dauerSchnell } }
+
+                        DropArea {
+                            anchors.fill: parent
+                            onEntered: leiste.zielOrdner = ordnerBlock.ordnerName
+                            onExited: if (leiste.zielOrdner === ordnerBlock.ordnerName) leiste.zielOrdner = ""
+                            onDropped: function(drop) {
+                                if (leiste.ziehtId !== "")
+                                    sets.lernsetVerschieben(leiste.ziehtId, ordnerBlock.ordnerName)
+                                leiste.zielOrdner = ""
+                                leiste.ziehtId = ""
+                            }
+                        }
+
+                        ColumnLayout {
+                            id: ordnerSpalte
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            anchors.margins: Theme.abstandXs
+                            spacing: 3
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: ordnerBlock.ordnerName
+                                    color: Theme.textPrimary
+                                    font.pixelSize: Theme.schriftM
+                                    font.bold: true
+                                    elide: Text.ElideRight
+                                    leftPadding: Theme.abstandXs
+                                }
+                                ToolButton {
+                                    implicitWidth: 28; implicitHeight: 26
+                                    onClicked: leiste.neuAnlegen(ordnerBlock.ordnerName)
+                                    ToolTip.visible: hovered
+                                    ToolTip.text: "Neues Lernset in „" + ordnerBlock.ordnerName + "“"
+                                    background: Rectangle {
+                                        radius: Theme.radiusKlein
+                                        color: parent.hovered ? Theme.primary : "transparent"
+                                    }
+                                    contentItem: Text {
+                                        text: "+"
+                                        color: parent.hovered ? Theme.onPrimary : Theme.textSecondary
+                                        font.pixelSize: 17; font.bold: true
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+                                }
+                            }
+
+                            Repeater {
+                                model: ordnerBlock.modelData.lernsets
+                                delegate: Item {
+                                    id: eintrag
+                                    required property var modelData
+                                    Layout.fillWidth: true
+                                    implicitHeight: 44
+
+                                    Rectangle {
+                                        id: flaeche
+                                        anchors.fill: parent
+                                        radius: Theme.radiusKlein
+                                        color: eintrag.modelData.aktiv ? Theme.primary
+                                             : zeiger.containsMouse ? Theme.border : "transparent"
+                                        Behavior on color { ColorAnimation { duration: Theme.dauerSchnell } }
+                                        opacity: leiste.ziehtId === eintrag.modelData.id ? 0.4 : 1.0
+
+                                        ColumnLayout {
+                                            anchors.fill: parent
+                                            anchors.leftMargin: Theme.abstandS
+                                            anchors.rightMargin: Theme.abstandS
+                                            anchors.topMargin: 5
+                                            spacing: 3
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: eintrag.modelData.name
+                                                color: eintrag.modelData.aktiv ? Theme.onPrimary : Theme.textPrimary
+                                                font.pixelSize: Theme.schriftS
+                                                elide: Text.ElideRight
+                                            }
+                                            RowLayout {
+                                                Layout.fillWidth: true
+                                                spacing: Theme.abstandXs
+                                                ProgressTrack {
+                                                    Layout.fillWidth: true
+                                                    dicke: 4
+                                                    anteil: eintrag.modelData.prozent / 100
+                                                    fuellFarbe: eintrag.modelData.aktiv ? Theme.onPrimary : Theme.success
+                                                }
+                                                Text {
+                                                    text: eintrag.modelData.prozent + "%"
+                                                    color: eintrag.modelData.aktiv ? Theme.onPrimary : Theme.textSecondary
+                                                    font.pixelSize: Theme.schriftXs
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: zeiger
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                        drag.target: ziehBild
+                                        drag.threshold: 8
+
+                                        onPressed: function(maus) {
+                                            if (maus.button === Qt.RightButton) {
+                                                kontext.lernsetId = eintrag.modelData.id
+                                                kontext.lernsetName = eintrag.modelData.name
+                                                kontext.quellOrdner = ordnerBlock.ordnerName
+                                                kontext.popup()
+                                            }
+                                        }
+                                        onClicked: function(maus) {
+                                            if (maus.button === Qt.LeftButton && leiste.ziehtId === "")
+                                                sets.waehle(eintrag.modelData.id)
+                                        }
+                                        onDoubleClicked: leiste.bearbeiten(eintrag.modelData.id)
+
+                                        Item {
+                                            id: ziehBild
+                                            width: 1; height: 1
+                                            Drag.active: zeiger.drag.active
+                                            Drag.hotSpot: Qt.point(0, 0)
+                                            onXChanged: if (Drag.active) leiste.ziehtId = eintrag.modelData.id
+                                        }
+                                        onReleased: {
+                                            if (leiste.ziehtId !== "" && leiste.zielOrdner !== ""
+                                                && leiste.zielOrdner !== ordnerBlock.ordnerName) {
+                                                sets.lernsetVerschieben(leiste.ziehtId, leiste.zielOrdner)
+                                            }
+                                            leiste.ziehtId = ""
+                                            leiste.zielOrdner = ""
+                                        }
+                                    }
+                                }
+                            }
+
+                            Text {
+                                visible: ordnerBlock.modelData.lernsets.length === 0
+                                Layout.fillWidth: true
+                                text: "leer"
+                                color: Theme.textDisabled
+                                font.pixelSize: Theme.schriftXs
+                                leftPadding: Theme.abstandS
+                                bottomPadding: Theme.abstandXs
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        PrimaryButton {
+            Layout.fillWidth: true
+            implicitHeight: 36
+            sekundaer: true
+            text: "+ Ordner"
+            onClicked: ordnerDialog.open()
+        }
+    }
+
+    // -- Kontextmenue ---------------------------------------------------------
+    Menu {
+        id: kontext
+        property string lernsetId: ""
+        property string lernsetName: ""
+        property string quellOrdner: ""
+
+        MenuItem {
+            text: "Bearbeiten"
+            onTriggered: leiste.bearbeiten(kontext.lernsetId)
+        }
+        Menu {
+            title: "Verschieben nach"
+            enabled: sets.ordnerNamen.length > 1
+            Repeater {
+                model: sets.ordnerNamen
+                delegate: MenuItem {
+                    required property string modelData
+                    text: modelData
+                    enabled: modelData !== kontext.quellOrdner
+                    onTriggered: sets.lernsetVerschieben(kontext.lernsetId, modelData)
+                }
+            }
+        }
+        MenuSeparator {}
+        MenuItem {
+            text: "Löschen"
+            onTriggered: {
+                loeschDialog.lernsetId = kontext.lernsetId
+                loeschDialog.lernsetName = kontext.lernsetName
+                loeschDialog.open()
+            }
+        }
+    }
+
+    // -- Dialoge --------------------------------------------------------------
+    Dialog {
+        id: ordnerDialog
+        anchors.centerIn: Overlay.overlay
+        modal: true
+        title: "Neuer Ordner"
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        onOpened: ordnerFeld.forceActiveFocus()
+        onAccepted: { sets.ordnerAnlegen(ordnerFeld.text); ordnerFeld.text = "" }
+        background: Rectangle {
+            color: Theme.surface; radius: Theme.radiusMittel
+            border.color: Theme.border; border.width: 1
+        }
+        contentItem: AnswerField {
+            id: ordnerFeld
+            implicitWidth: 300
+            placeholderText: "Ordnername"
+            onAccepted: ordnerDialog.accept()
+        }
+    }
+
+    Dialog {
+        id: loeschDialog
+        property string lernsetId: ""
+        property string lernsetName: ""
+        anchors.centerIn: Overlay.overlay
+        modal: true
+        title: "Lernset löschen?"
+        standardButtons: Dialog.Yes | Dialog.No
+        onAccepted: sets.lernsetLoeschen(loeschDialog.lernsetId)
+        background: Rectangle {
+            color: Theme.surface; radius: Theme.radiusMittel
+            border.color: Theme.border; border.width: 1
+        }
+        contentItem: Text {
+            text: "„" + loeschDialog.lernsetName + "“ wird entfernt.\n"
+                  + "Der gespeicherte Fortschritt bleibt erhalten."
+            color: Theme.textPrimary
+            font.pixelSize: Theme.schriftM
+            wrapMode: Text.WordWrap
+        }
+    }
+}

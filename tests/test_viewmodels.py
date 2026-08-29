@@ -1,0 +1,330 @@
+"""Tests der Qt-ViewModels.
+
+Laufen headless. Jeder Test bekommt ein eigenes Datenverzeichnis - die echten
+Dateien unter ~/.lernapp werden nie angefasst.
+
+Bewusst NICHT getestet: Lernregeln. Die sind in test_learning_engine.py und
+test_progress.py abgedeckt und werden hier nicht dupliziert.
+"""
+import json
+
+import pytest
+
+pytest.importorskip("PySide6", reason="PySide6 nicht installiert - venv nutzen")
+
+from lernapp.gui.bridge.app_state import AppState                    # noqa: E402
+from lernapp.gui.bridge.learning_viewmodel import LearningViewModel  # noqa: E402
+from lernapp.gui.bridge.sets_viewmodel import SetsViewModel          # noqa: E402
+from lernapp.gui.bridge.settings_viewmodel import SettingsViewModel  # noqa: E402
+
+DATEN = {
+    "folders": {
+        "Franzoesisch": {"lernsets": [
+            {"id": "set-a", "name": "Unite 4", "items": [
+                {"q": "la maison", "a": "das haus"},
+                {"q": "le chien", "a": "der hund"},
+            ]},
+        ]},
+        "Englisch": {"lernsets": [
+            {"id": "set-b", "name": "Verben", "items": [
+                {"q": "go ___ ___", "a": "went, gone"},
+                {"q": "___ went ___", "a": "go, gone"},
+                {"q": "___ ___ gone", "a": "go, went"},
+                {"q": "___ had to ___", "a": "must, had to"},
+            ]},
+        ]},
+    }
+}
+
+
+def loesung_fuer(lernen):
+    return "das haus" if lernen.frageText == "la maison" else "der hund"
+
+
+@pytest.fixture
+def basis(tmp_path):
+    (tmp_path / "data.json").write_text(json.dumps(DATEN), encoding="utf-8")
+    return tmp_path
+
+
+@pytest.fixture
+def state(basis):
+    return AppState(basis)
+
+
+@pytest.fixture
+def vms(state):
+    einst = SettingsViewModel(state)
+    lernen = LearningViewModel(state, richtung="→")
+    sets = SetsViewModel(state)
+    sets.lernsetGewaehlt.connect(lernen.waehleLernset)
+    einst.richtungGeaendert.connect(lernen.setzeRichtung)
+    lernen.fortschrittGespeichert.connect(lambda _i: sets.aktualisiere())
+    return einst, lernen, sets
+
+
+# -- SettingsViewModel --------------------------------------------------------
+
+def test_theme_umschalten_wird_gespeichert(state):
+    vm = SettingsViewModel(state)
+    assert vm.dark is True
+    vm.themeUmschalten()
+    assert vm.dark is False
+    assert AppState(state._basis).settings["theme"] == "light"
+
+
+def test_richtung_wird_gespeichert_und_validiert(state):
+    vm = SettingsViewModel(state)
+    vm.setzeRichtung("←")
+    assert vm.richtung == "←"
+    vm.setzeRichtung("unsinn")
+    assert vm.richtung == "←", "ungueltige Richtung wird ignoriert"
+    assert AppState(state._basis).settings["richtung"] == "←"
+
+
+def test_fenstergroesse_wird_gemerkt_aber_unsinn_nicht(state):
+    vm = SettingsViewModel(state)
+    vm.merkeFenster(1400, 900)
+    assert AppState(state._basis).settings["fenster"] == {"breite": 1400, "hoehe": 900}
+    vm.merkeFenster(10, 10)
+    assert AppState(state._basis).settings["fenster"] == {"breite": 1400, "hoehe": 900}
+
+
+# -- SetsViewModel ------------------------------------------------------------
+
+def test_ordner_und_lernsets_werden_gelistet(vms):
+    _e, _l, sets = vms
+    ordner = sets.ordner
+    assert [o["name"] for o in ordner] == ["Franzoesisch", "Englisch"]
+    assert ordner[0]["lernsets"][0]["name"] == "Unite 4"
+
+
+def test_triple_paket_zaehlt_als_eine_einheit_in_der_seitenleiste(vms):
+    _e, _l, sets = vms
+    englisch = next(o for o in sets.ordner if o["name"] == "Englisch")
+    verben = englisch["lernsets"][0]
+    # 4 Karten auf der Platte = 1 vollstaendiges Paket + 1 Einzelkarte
+    assert verben["karten"] == 2, "Pakete zaehlen als eins, nicht als drei"
+
+
+def test_lernset_anlegen_bearbeiten_loeschen(vms):
+    _e, _l, sets = vms
+    neu = sets.lernsetAnlegenIn("Franzoesisch", "Neu", [{"q": "frage", "a": "antwort"}])
+    assert neu != ""
+    assert sets.lernsetSpeichern(neu, "Umbenannt", [{"q": "x", "a": "y"}]) == neu
+    geladen = sets.lernsetLaden(neu)
+    assert geladen["name"] == "Umbenannt"
+    assert geladen["items"] == [{"q": "x", "a": "y"}]
+    assert sets.lernsetLoeschen(neu) is True
+    assert sets.lernsetLaden(neu) == {}
+
+
+def test_leere_karten_werden_beim_speichern_verworfen(vms):
+    _e, _l, sets = vms
+    neu = sets.lernsetAnlegenIn("Franzoesisch", "Gemischt", [
+        {"q": "gut", "a": "bon"},
+        {"q": "   ", "a": "leer"},
+        {"q": "ohne antwort", "a": ""},
+    ])
+    assert sets.lernsetLaden(neu)["items"] == [{"q": "gut", "a": "bon"}]
+
+
+def test_lernset_ohne_namen_oder_karten_wird_abgelehnt(vms):
+    _e, _l, sets = vms
+    fehler = []
+    sets.fehler.connect(fehler.append)
+    assert sets.lernsetAnlegenIn("Franzoesisch", "", [{"q": "a", "a": "b"}]) == ""
+    assert sets.lernsetSpeichern("", "Name", []) == ""
+    assert len(fehler) == 2
+
+
+def test_verschieben_zwischen_ordnern(vms):
+    _e, _l, sets = vms
+    assert sets.lernsetVerschieben("set-a", "Englisch") is True
+    englisch = next(o for o in sets.ordner if o["name"] == "Englisch")
+    assert "Unite 4" in [ls["name"] for ls in englisch["lernsets"]]
+    assert sets.lernsetVerschieben("set-a", "Gibtsnicht") is False
+
+
+def test_ordner_anlegen_und_loeschen(vms):
+    _e, _l, sets = vms
+    fehler = []
+    sets.fehler.connect(fehler.append)
+    assert sets.ordnerAnlegen("Latein") is True
+    assert sets.ordnerAnlegen("Latein") is False, "Duplikat"
+    assert sets.ordnerLoeschen("Latein") is True
+    assert sets.ordnerLoeschen("Franzoesisch") is False, "nicht leer"
+    assert len(fehler) == 2
+
+
+def test_triple_karten_kommen_aus_dem_core(vms):
+    _e, _l, sets = vms
+    karten = sets.tripleKarten("must", "had to", "had to")
+    assert len(karten) == 3
+    assert karten[0] == {"q": "must ___ ___", "a": "had to, had to"}
+    assert karten[1] == {"q": "___ had to ___", "a": "must, had to"}
+    assert sets.tripleKarten("go", "", "gone") == []
+
+
+def test_geloeschtes_lernset_behaelt_seinen_fortschritt(vms, state):
+    _e, lernen, sets = vms
+    sets.waehle("set-a")
+    lernen.pruefe([loesung_fuer(lernen)])
+    sets.lernsetLoeschen("set-a")
+    assert AppState(state._basis).progress["set-a"]["xp"] == 10
+
+
+# -- LearningViewModel --------------------------------------------------------
+
+def test_lernset_waehlen_startet_eine_frage(vms):
+    _e, lernen, sets = vms
+    sets.waehle("set-a")
+    assert lernen.hatLernset
+    assert lernen.lernsetName == "Unite 4"
+    assert lernen.frageTyp == "normal"
+    assert lernen.frageText in ("la maison", "le chien")
+
+
+def test_richtige_antwort_gibt_xp_und_sperrt(vms):
+    _e, lernen, sets = vms
+    sets.waehle("set-a")
+    lernen.pruefe([loesung_fuer(lernen)])
+    assert lernen.feedbackArt == "richtig"
+    assert lernen.xp == 10
+    assert lernen.combo == 1
+    assert lernen.gesperrt is True
+
+
+def test_falsche_antwort_meldet_loesung(vms):
+    _e, lernen, sets = vms
+    sets.waehle("set-a")
+    lernen.pruefe(["voellig falsch"])
+    assert lernen.feedbackArt == "falsch"
+    assert "Richtig" in lernen.feedbackText
+    assert lernen.combo == 0
+
+
+def test_gesperrt_verhindert_doppelte_antwort(vms):
+    _e, lernen, sets = vms
+    sets.waehle("set-a")
+    loesung = loesung_fuer(lernen)
+    lernen.pruefe([loesung])
+    xp = lernen.xp
+    lernen.pruefe([loesung])
+    assert lernen.xp == xp, "zweite Antwort ohne weiter() wird ignoriert"
+
+
+def test_triple_karte_liefert_zwei_eingabefelder(vms):
+    _e, lernen, sets = vms
+    sets.waehle("set-b")
+    for _ in range(40):
+        if lernen.frageTyp == "triple":
+            break
+        lernen.weiter()
+    assert lernen.frageTyp == "triple"
+    assert len(lernen.slots) == 3
+    assert len([s for s in lernen.slots if s["eingabe"]]) == 2
+
+
+def test_regression_had_to_karte_ist_ueber_das_viewmodel_loesbar(vms):
+    """Die Karte, die in der alten App nie loesbar war."""
+    _e, lernen, sets = vms
+    sets.waehle("set-b")
+    for _ in range(80):
+        if lernen.frageTyp == "triple" and lernen.slots[1]["text"] == "had to":
+            break
+        lernen.weiter()
+    else:
+        pytest.fail("Karte mit sichtbarer Mittelform wurde nie gezogen")
+    lernen.pruefe(["must", "had to"])
+    assert lernen.feedbackArt == "richtig"
+
+
+def test_fortschritt_wird_nach_jeder_antwort_gespeichert(vms, state):
+    _e, lernen, sets = vms
+    sets.waehle("set-a")
+    lernen.pruefe([loesung_fuer(lernen)])
+    assert AppState(state._basis).progress["set-a"]["xp"] == 10
+
+
+def test_seitenleiste_zieht_prozent_nach(vms):
+    _e, lernen, sets = vms
+    sets.waehle("set-a")
+
+    def prozent():
+        ordner = next(o for o in sets.ordner if o["name"] == "Franzoesisch")
+        return ordner["lernsets"][0]["prozent"]
+
+    vorher = prozent()
+    lernen.pruefe([loesung_fuer(lernen)])
+    assert prozent() > vorher
+
+
+def test_fortschritt_loeschen_betrifft_nur_das_aktuelle_lernset(vms, state):
+    _e, lernen, sets = vms
+    sets.waehle("set-a")
+    lernen.pruefe([loesung_fuer(lernen)])
+
+    sets.waehle("set-b")
+    for _ in range(40):
+        if lernen.frageTyp == "triple":
+            break
+        lernen.weiter()
+    lernen.pruefe(list(s["text"] for s in lernen.slots if not s["eingabe"]) or ["x"])
+    xp_b = AppState(state._basis).progress.get("set-b", {}).get("xp", 0)
+
+    sets.waehle("set-a")
+    lernen.fortschrittLoeschen()
+    assert lernen.xp == 0
+    assert AppState(state._basis).progress.get("set-b", {}).get("xp", 0) == xp_b
+
+
+def test_best_combo_ueberlebt_fortschritt_loeschen(vms):
+    _e, lernen, sets = vms
+    sets.waehle("set-a")
+    lernen.pruefe([loesung_fuer(lernen)])
+    assert lernen.bestCombo == 1
+    lernen.fortschrittLoeschen()
+    assert lernen.xp == 0
+    assert lernen.bestCombo == 1, "Rekord bleibt"
+
+
+def test_richtungswechsel_erreicht_die_session(vms):
+    einst, lernen, sets = vms
+    sets.waehle("set-a")
+    einst.setzeRichtung("←")
+    lernen.weiter()
+    assert lernen.rueckwaerts is True
+
+
+def test_lernset_neu_laden_nach_bearbeiten(vms):
+    _e, lernen, sets = vms
+    sets.waehle("set-a")
+    sets.lernsetSpeichern("set-a", "Unite 4", [{"q": "neu", "a": "new"}])
+    lernen.lernsetNeuLaden()
+    assert lernen.gesamt == 1
+    assert lernen.frageText == "neu"
+
+
+def test_statistik_am_ende_der_sitzung(vms):
+    _e, lernen, sets = vms
+    sets.waehle("set-a")
+    for _ in range(12):
+        if lernen.frageTyp == "fertig":
+            break
+        if lernen.frageTyp == "normal":
+            lernen.pruefe([loesung_fuer(lernen)])
+        lernen.weiter()
+    assert lernen.frageTyp == "fertig"
+    assert lernen.statistik["accuracy"] == 100
+    assert lernen.statistik["richtig"] == 2
+
+
+def test_ohne_lernset_passiert_nichts(state):
+    lernen = LearningViewModel(state, richtung="→")
+    assert lernen.hatLernset is False
+    lernen.pruefe(["irgendwas"])
+    lernen.weiter()
+    lernen.neustart()
+    lernen.fortschrittLoeschen()
+    assert lernen.frageTyp == "leer"

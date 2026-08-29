@@ -1,11 +1,13 @@
-"""LernApp - Einstiegspunkt.
+"""LernApp - Einstiegspunkt (PySide6/QML).
 
-Die Lernlogik liegt in lernapp/core (GUI-frei und getestet), die Oberflaeche in
-lernapp/gui, die Persistenz in lernapp/storage.
+    python LernApp.py     neue Qt-Oberflaeche
+    python run_ctk.py     alte CustomTkinter-Oberflaeche (Vergleich)
 
-Start:  python LernApp.py
+Umgebungsvariablen fuer Entwicklung:
+    LERNAPP_DATA_DIR   anderes Datenverzeichnis (schont die echten Daten)
+    LERNAPP_FENSTER    "x,y" - Fensterposition
 """
-from lernapp.gui.main_window import run_gui
+from lernapp.gui.app import run
 
 if __name__ == "__main__":
-    run_gui()
+    raise SystemExit(run())

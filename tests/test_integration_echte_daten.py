@@ -141,7 +141,11 @@ def test_bestehender_fortschritt_wird_ohne_verlust_migriert():
         assert neu[set_id]["correct"] == alt.get("correct", 0)
         assert neu[set_id]["wrong"] == alt.get("wrong", 0)
         assert neu[set_id]["streaks"] == alt.get("streaks", {})
-        assert neu[set_id]["best_combo"] == alt.get("combo", 0), "Combo wird zum Rekord"
+        # Die Datei kann bereits migriert sein (dann steht der Rekord in
+        # best_combo) oder noch im Altformat (dann in combo).
+        erwarteter_rekord = alt.get("best_combo", alt.get("combo", 0))
+        assert neu[set_id]["best_combo"] == erwarteter_rekord, "Rekord bleibt erhalten"
+        assert neu[set_id]["combo"] == 0, "laufende Combo startet nie geerbt"
 
 
 def test_migration_der_echten_daten_ist_idempotent():

@@ -7,6 +7,7 @@ from __future__ import annotations
 from PySide6.QtCore import Property, QObject, Signal, Slot
 
 from lernapp.core.learning_engine import GEMISCHT, RUECKWAERTS, VORWAERTS
+from lernapp.platform_services import dienste
 
 from .app_state import AppState
 
@@ -81,6 +82,21 @@ class SettingsViewModel(QObject):
     @Slot()
     def soundUmschalten(self) -> None:
         self.sound = not self.sound
+
+    @Property(bool, constant=True)
+    def tonVerfuegbar(self) -> bool:
+        """False heisst: das System kann hier keinen Ton abspielen."""
+        return dienste().unterstuetzt_ton()
+
+    # -- Tastenkuerzel --------------------------------------------------------
+
+    @Property("QVariantMap", constant=True)
+    def kuerzel(self) -> dict:
+        """Aktionsname -> Tastenfolge, von der Plattformschicht bestimmt.
+
+        Die Oberflaeche verdrahtet nie selbst eine Kombination.
+        """
+        return dict(dienste().tastenkuerzel())
 
     # -- Fenstergroesse merken ------------------------------------------------
 

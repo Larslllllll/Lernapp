@@ -18,6 +18,15 @@ _FALSCH = "/System/Library/Sounds/Basso.aiff"
 class MacDienste(BasisDienste):
     name = "macos"
 
+    def tastenkuerzel(self) -> dict[str, str]:
+        """Qt uebersetzt "Ctrl" auf macOS selbst zu Command.
+
+        Die Standardzuordnung passt daher bereits. Sobald sich auf echter
+        Hardware zeigt, dass eine Kombination mit einem System-Kuerzel
+        kollidiert, wird sie hier - und nur hier - ueberschrieben.
+        """
+        return super().tastenkuerzel()
+
     def unterstuetzt_ton(self) -> bool:
         return Path(_RICHTIG).exists()
 

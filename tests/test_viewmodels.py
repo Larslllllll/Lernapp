@@ -328,3 +328,69 @@ def test_ohne_lernset_passiert_nichts(state):
     lernen.neustart()
     lernen.fortschrittLoeschen()
     assert lernen.frageTyp == "leer"
+
+
+# -- Ton und Tastenkuerzel ----------------------------------------------------
+
+def test_ton_laesst_sich_umschalten_und_wird_gespeichert(state):
+    vm = SettingsViewModel(state)
+    assert vm.sound is True
+    vm.soundUmschalten()
+    assert vm.sound is False
+    assert AppState(state._basis).settings["sound"] is False
+    vm.soundUmschalten()
+    assert AppState(state._basis).settings["sound"] is True
+
+
+def test_ton_verfuegbarkeit_kommt_von_der_plattform(state):
+    from lernapp.platform_services import dienste
+
+    vm = SettingsViewModel(state)
+    assert vm.tonVerfuegbar == dienste().unterstuetzt_ton()
+
+
+def test_abgeschalteter_ton_wird_beim_antworten_respektiert(vms, state, monkeypatch):
+    einst, lernen, sets = vms
+    gespielt = []
+    monkeypatch.setattr(
+        "lernapp.gui.bridge.learning_viewmodel.dienste",
+        lambda: type("D", (), {"spiele_ton": lambda self, ok: gespielt.append(ok)})(),
+    )
+    sets.waehle("set-a")
+    lernen.pruefe([loesung_fuer(lernen)])
+    assert gespielt == [True]
+
+    einst.soundUmschalten()
+    lernen.weiter()
+    lernen.pruefe(["falsch"])
+    assert gespielt == [True], "bei abgeschaltetem Ton wird nichts gespielt"
+
+
+def test_kuerzel_kommen_aus_der_plattformschicht(state):
+    from lernapp.platform_services.base import AKTIONEN
+
+    vm = SettingsViewModel(state)
+    kuerzel = vm.kuerzel
+    assert set(kuerzel) == set(AKTIONEN), "jede Aktion braucht ein Kuerzel"
+    assert all(isinstance(v, str) and v for v in kuerzel.values())
+
+
+def test_kuerzel_sind_eindeutig(state):
+    vm = SettingsViewModel(state)
+    werte = list(vm.kuerzel.values())
+    assert len(werte) == len(set(werte)), "keine Kombination doppelt vergeben"
+
+
+def test_macos_kuerzel_sind_vollstaendig():
+    """macOS-Zuordnung darf keine Aktion vergessen, auch wenn sie erbt."""
+    from lernapp.platform_services.base import AKTIONEN
+    from lernapp.platform_services.macos import MacDienste
+
+    assert set(MacDienste().tastenkuerzel()) == set(AKTIONEN)
+
+
+def test_windows_kuerzel_sind_vollstaendig():
+    from lernapp.platform_services.base import AKTIONEN
+    from lernapp.platform_services.windows import WindowsDienste
+
+    assert set(WindowsDienste().tastenkuerzel()) == set(AKTIONEN)

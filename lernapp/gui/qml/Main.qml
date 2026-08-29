@@ -30,10 +30,29 @@ ApplicationWindow {
     }
 
     // -- Tastatur (global) ----------------------------------------------------
-    Shortcut { sequence: "Ctrl+N"; onActivated: dialog.oeffnenNeu(sets.ordnerNamen[0] || "") }
-    Shortcut { sequence: "Ctrl+E"; onActivated: if (lernen.lernsetId) dialog.oeffnenBearbeiten(lernen.lernsetId) }
-    Shortcut { sequence: "Ctrl+D"; onActivated: einstellungen.themeUmschalten() }
-    Shortcut { sequence: "Ctrl+R"; onActivated: if (lernen.hatLernset) lernen.neustart() }
+    // Die Kombinationen kommen aus lernapp.platform_services, damit macOS sie
+    // spaeter abweichen lassen kann, ohne dass die Oberflaeche sich aendert.
+    Shortcut {
+        sequence: einstellungen.kuerzel.neuesLernset
+        onActivated: dialog.oeffnenNeu(sets.ordnerNamen[0] || "")
+    }
+    Shortcut {
+        sequence: einstellungen.kuerzel.lernsetBearbeiten
+        onActivated: if (lernen.lernsetId) dialog.oeffnenBearbeiten(lernen.lernsetId)
+    }
+    Shortcut {
+        sequence: einstellungen.kuerzel.themeUmschalten
+        onActivated: einstellungen.themeUmschalten()
+    }
+    Shortcut {
+        sequence: einstellungen.kuerzel.tonUmschalten
+        enabled: einstellungen.tonVerfuegbar
+        onActivated: einstellungen.soundUmschalten()
+    }
+    Shortcut {
+        sequence: einstellungen.kuerzel.neustart
+        onActivated: if (lernen.hatLernset) lernen.neustart()
+    }
 
     RowLayout {
         anchors.fill: parent

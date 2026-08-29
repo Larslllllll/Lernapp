@@ -32,22 +32,21 @@ Rectangle {
                 font.bold: true
                 leftPadding: Theme.abstandXs
             }
-            ToolButton {
-                implicitWidth: 34; implicitHeight: 34
+            IconToggle {
+                symbol: einstellungen.sound ? "🔊" : "🔇"
+                aktiv: einstellungen.sound
+                enabled: einstellungen.tonVerfuegbar
+                hinweis: !einstellungen.tonVerfuegbar
+                         ? "Auf diesem System ist kein Ton verfügbar"
+                         : (einstellungen.sound ? "Ton aus" : "Ton an")
+                           + "  (" + einstellungen.kuerzel.tonUmschalten + ")"
+                onClicked: einstellungen.soundUmschalten()
+            }
+            IconToggle {
+                symbol: einstellungen.dark ? "☀" : "☾"
+                hinweis: (einstellungen.dark ? "Helles Design" : "Dunkles Design")
+                         + "  (" + einstellungen.kuerzel.themeUmschalten + ")"
                 onClicked: einstellungen.themeUmschalten()
-                ToolTip.visible: hovered
-                ToolTip.text: einstellungen.dark ? "Helles Design" : "Dunkles Design"
-                background: Rectangle {
-                    radius: Theme.radiusKlein
-                    color: parent.hovered ? Theme.surfaceElevated : "transparent"
-                }
-                contentItem: Text {
-                    text: einstellungen.dark ? "☀" : "☾"
-                    color: Theme.textSecondary
-                    font.pixelSize: 16
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
             }
         }
 

@@ -16,6 +16,23 @@ except ImportError:  # pragma: no cover - nur auf Nicht-Windows
 class WindowsDienste(BasisDienste):
     name = "windows"
 
+    def beim_start(self) -> None:
+        """Anwendungs-ID setzen.
+
+        Ohne sie gruppiert Windows die App unter "Python" statt unter LernApp,
+        und spaetere Toast-Benachrichtigungen laufen ins Leere. Muss vor dem
+        ersten Fenster passieren.
+        """
+        from lernapp import APP_USER_MODEL_ID
+
+        try:
+            import ctypes
+
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+                APP_USER_MODEL_ID)
+        except Exception:
+            pass
+
     def unterstuetzt_ton(self) -> bool:
         return _TON
 

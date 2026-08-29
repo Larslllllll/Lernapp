@@ -12,6 +12,9 @@ from PySide6.QtCore import QUrl
 from PySide6.QtGui import QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine
 
+from lernapp import __version__
+from lernapp.platform_services import dienste
+
 from .bridge.app_state import AppState
 from .bridge.learning_viewmodel import LearningViewModel
 from .bridge.sets_viewmodel import SetsViewModel
@@ -62,8 +65,11 @@ def _entwicklungsposition(engine: QQmlApplicationEngine) -> None:
 
 
 def run() -> int:
+    dienste().beim_start()
+
     app = QGuiApplication(sys.argv)
     app.setApplicationName("LernApp")
+    app.setApplicationVersion(__version__)
     app.setOrganizationName("LernApp")
     if ICON.exists():
         app.setWindowIcon(QIcon(str(ICON)))

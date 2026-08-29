@@ -8,6 +8,8 @@ nicht benoetigte Qt-Module sind gar nicht erst installiert.
 """
 from __future__ import annotations
 
+import argparse
+import os
 import shutil
 import subprocess
 import sys
@@ -15,7 +17,11 @@ import time
 from pathlib import Path
 
 WURZEL = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(WURZEL))
+from lernapp import __version__  # noqa: E402
+
 SPEC = WURZEL / "packaging" / "lernapp.spec"
+ISS = WURZEL / "packaging" / "lernapp.iss"
 DIST = WURZEL / "dist"
 # Eigenes Arbeitsverzeichnis: build/ enthaelt noch Altlasten frueherer
 # Versionen, die uns nicht gehoeren und die wir nicht anfassen.
@@ -123,7 +129,44 @@ def pruefe_ergebnis() -> None:
         fehler("theme/qmldir fehlt - der Theme-Singleton wuerde nicht laden")
 
 
+def _iscc() -> Path | None:
+    """Inno-Setup-Compiler suchen."""
+    aus_pfad = shutil.which("ISCC")
+    if aus_pfad:
+        return Path(aus_pfad)
+    for basis in (os.environ.get("ProgramFiles(x86)"), os.environ.get("ProgramFiles")):
+        if not basis:
+            continue
+        for version in ("6", "5"):
+            kandidat = Path(basis) / f"Inno Setup {version}" / "ISCC.exe"
+            if kandidat.exists():
+                return kandidat
+    return None
+
+
+def installer_bauen() -> Path:
+    iscc = _iscc()
+    if iscc is None:
+        fehler("Inno Setup nicht gefunden. winget install JRSoftware.InnoSetup")
+    ergebnis = subprocess.run(
+        [str(iscc), f"/DAppVersion={__version__}", str(ISS)],
+        cwd=str(WURZEL / "packaging"),
+    )
+    if ergebnis.returncode != 0:
+        fehler(f"Inno Setup endete mit Code {ergebnis.returncode}")
+    setup = DIST / f"LernApp-Setup-{__version__}.exe"
+    if not setup.exists():
+        fehler(f"{setup.name} wurde nicht erzeugt")
+    return setup
+
+
 def main() -> int:
+    argumente = argparse.ArgumentParser(description="Windows-Build fuer LernApp")
+    argumente.add_argument("--installer", action="store_true",
+                           help="zusaetzlich den Inno-Setup-Installer bauen")
+    optionen = argumente.parse_args()
+
+    print(f"LernApp {__version__}")
     print("Voraussetzungen pruefen ...")
     pruefe_umgebung()
     print("Bauen ...")
@@ -137,6 +180,14 @@ def main() -> int:
     print(f"  Build          {dauer:.0f} s")
     print(f"  Bundle         {gesamt:.0f} MB   (davon Qt-DLLs {qt:.0f} MB)")
     print(f"  Ausgabe        {ZIEL}")
+
+    if optionen.installer:
+        print()
+        print("Installer bauen ...")
+        setup = installer_bauen()
+        print()
+        print(f"  Installer      {setup.stat().st_size / 1024 / 1024:.0f} MB")
+        print(f"  Ausgabe        {setup}")
     print()
     print("  Der Build gilt erst als getestet, wenn die .exe gestartet und eine")
     print("  echte Lernrunde inklusive Neustart durchgespielt wurde.")

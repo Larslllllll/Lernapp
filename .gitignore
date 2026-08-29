@@ -15,6 +15,7 @@ venv/
 # Grosse Archive / Binaries
 *.zip
 *.exe
+LernApp-Setup-*.exe
 
 # Werkzeug-Output
 graphify-out/cache/

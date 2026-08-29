@@ -32,6 +32,8 @@ class PlattformDienste(Protocol):
 
     def tastenkuerzel(self) -> dict[str, str]: ...
 
+    def beim_start(self) -> None: ...
+
 
 class BasisDienste:
     """Neutrale Grundimplementierung - tut nichts, schlaegt nie fehl."""
@@ -43,6 +45,10 @@ class BasisDienste:
 
     def unterstuetzt_ton(self) -> bool:
         return False
+
+    def beim_start(self) -> None:
+        """Einmalige Einrichtung vor dem ersten Fenster. Standard: nichts."""
+        return None
 
     def datenverzeichnis(self) -> Path:
         from lernapp.storage import paths

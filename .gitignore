@@ -17,9 +17,10 @@ venv/
 *.exe
 LernApp-Setup-*.exe
 
-# Werkzeug-Output
-graphify-out/cache/
-graphify-out/.graphify_*
+# Werkzeug-Output (gehoert nicht in ein oeffentliches Repo)
+graphify-out/
+.werkzeug-a/
+.werkzeug-b/
 
 # Lokale Nutzerdaten / Secrets
 .env

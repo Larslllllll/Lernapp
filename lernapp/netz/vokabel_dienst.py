@@ -27,7 +27,7 @@ from .lernset_ki import erkenne_vokabeln as direkt_erkennen
 
 # Adresse des Vermittlers. Öffentlich und ungefährlich - er kann nur
 # Vokabeln erkennen, siehe server/worker.js.
-DIENST_URL = ""
+DIENST_URL = "https://lernapp-vokabeln.ytschau80.workers.dev"
 
 ZEITLIMIT = 120
 GERAET_DATEI = "geraet.txt"
@@ -80,6 +80,10 @@ def _ueber_dienst(text: str, geraet: str) -> Vorschlag:
     nutzlast = json.dumps({"text": text, "geraet": geraet}).encode("utf-8")
     anfrage = urllib.request.Request(
         DIENST_URL.rstrip("/") + "/vokabeln", data=nutzlast, method="POST",
+        # Der User-Agent ist NICHT schmückendes Beiwerk: Cloudflare lehnt den
+        # Standardwert von urllib ("Python-urllib/3.11") mit 403 und
+        # "error code: 1010" ab, bevor der Worker ihn je sieht. Ohne diese
+        # Zeile ist der PDF-Import tot, und die Meldung sagt nicht warum.
         headers={"Content-Type": "application/json", "User-Agent": "LernApp"},
     )
     try:

@@ -22,8 +22,21 @@ const ANBIETER = "https://inference-api.nousresearch.com/v1/chat/completions";
 
 // Deckel. Grosszügig genug für den Unterricht, eng genug, dass ein
 // Einzelner nicht allen anderen den Tag verdirbt.
-const PRO_GERAET_TAG = 20;
-const INSGESAMT_TAG = 1500;
+//
+// Nachgemessen: 55 Anfragen in 55 Sekunden ergaben 50 Erfolge und 5 mal 429
+// mit "reset in 7 Sekunden". Der Anbieter hat also KEIN Kontingent, das
+// leerlaeuft, sondern eine Minutenbremse. Deshalb wird bei 429 gewartet und
+// wiederholt, statt den Nutzer abzuweisen.
+//
+// Der Tagesdeckel ist entsprechend kein fremdes Limit, sondern nur eine
+// Notbremse gegen ein durchgedrehtes Skript.
+const PRO_GERAET_TAG = 50;
+const INSGESAMT_TAG = 20000;
+
+// Wie lange hoechstens auf das Ende der Minutenbremse gewartet wird. Der
+// Anbieter nennt die Restzeit selbst; laenger als das zu warten hilft
+// niemandem, denn am anderen Ende sitzt jemand vor einem Fortschrittsbalken.
+const MAX_WARTEN_MS = 12000;
 
 // Eine Buchseite hat keine 40 000 Zeichen. Alles darüber ist ein Versehen
 // oder ein Versuch, das Kontingent zu verbrennen.
@@ -67,6 +80,26 @@ async function zaehle(kv, schluessel) {
   await kv.put(schluessel, String(stand), { expirationTtl: 60 * 60 * 48 });
   return stand;
 }
+
+/** Eine Anfrage an das Modell. Gibt die rohe Antwort zurueck, auch bei 429. */
+function frageModell(umgebung, text) {
+  return fetch(ANBIETER, {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${umgebung.NOUS_API_KEY}`,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      model: MODELL,
+      temperature: 0.1,
+      messages: [
+        { role: "system", content: SYSTEM },
+        { role: "user", content: AUFTRAG(text) },
+      ],
+    }),
+  });
+}
+
 
 export default {
   async fetch(anfrage, umgebung) {
@@ -137,21 +170,36 @@ export default {
 
     let modellAntwort;
     try {
-      const ergebnis = await fetch(ANBIETER, {
-        method: "POST",
-        headers: {
-          authorization: `Bearer ${umgebung.NOUS_API_KEY}`,
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          model: MODELL,
-          temperature: 0.1,
-          messages: [
-            { role: "system", content: SYSTEM },
-            { role: "user", content: AUFTRAG(text) },
-          ],
-        }),
-      });
+      let ergebnis = await frageModell(umgebung, text);
+
+      // Minutenbremse: der Anbieter nennt in der Antwort selbst, wie lange
+      // sie noch gilt. So lange warten und es noch einmal versuchen - fuer
+      // den Nutzer sieht das nach "dauert etwas" aus statt nach Fehler.
+      //
+      // Der Zufallsanteil ist nicht Zierde: ohne ihn warten alle
+      // Abgewiesenen exakt gleich lang und stuermen dann gemeinsam wieder
+      // los. Gemessen mit 60 gleichzeitigen Anfragen - ohne Streuung blieben
+      // sechs auf der Strecke.
+      for (let versuch = 0; versuch < 2 && ergebnis.status === 429; versuch++) {
+        const rest = parseFloat(
+          ergebnis.headers.get("x-ratelimit-reset-requests") || "5",
+        );
+        const grund = Math.max(1, isNaN(rest) ? 5 : rest) * 1000;
+        const warten = Math.min(grund + Math.random() * 3000, MAX_WARTEN_MS);
+        await new Promise((weiter) => setTimeout(weiter, warten));
+        ergebnis = await frageModell(umgebung, text);
+      }
+
+      if (ergebnis.status === 429) {
+        return antwort(
+          {
+            fehler:
+              "Gerade lesen viele gleichzeitig eine Seite ein. Bitte in " +
+              "einer Minute noch einmal versuchen.",
+          },
+          429,
+        );
+      }
       if (!ergebnis.ok) {
         return antwort(
           { fehler: "Der Dienst antwortet gerade nicht. Bitte spaeter erneut." },

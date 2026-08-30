@@ -1,6 +1,6 @@
 """LernApp - Vokabeltrainer."""
 
-__version__ = "0.10.0"
+__version__ = "0.11.0"
 
 # Stabile Anwendungs-ID. Windows braucht sie für die Gruppierung in der
 # Taskleiste und später für Toast-Benachrichtigungen; der Installer setzt

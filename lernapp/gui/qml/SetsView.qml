@@ -14,6 +14,7 @@ Rectangle {
 
     signal bearbeiten(string lernsetId)
     signal neuAnlegen(string ordner)
+    signal marktplatzOeffnen()
 
     property string ziehtId: ""
     property string zielOrdner: ""
@@ -252,6 +253,13 @@ Rectangle {
                 text: "Import"
                 onClicked: importDialog.open()
             }
+        }
+
+        PrimaryButton {
+            Layout.fillWidth: true
+            implicitHeight: 36
+            text: "Marktplatz"
+            onClicked: leiste.marktplatzOeffnen()
         }
     }
 

@@ -20,6 +20,7 @@ from lernapp.storage import protokoll
 from .absturz import installiere_excepthook, setze_hauptfenster
 from .bridge.app_state import AppState
 from .bridge.learning_viewmodel import LearningViewModel
+from .bridge.marktplatz_viewmodel import MarktplatzViewModel
 from .bridge.sets_viewmodel import SetsViewModel
 from .bridge.settings_viewmodel import SettingsViewModel
 
@@ -88,6 +89,7 @@ def run() -> int:
     einstellungen = SettingsViewModel(state)
     lernen = LearningViewModel(state, richtung=einstellungen.richtung)
     sets = SetsViewModel(state)
+    markt = MarktplatzViewModel(state)
     _verdrahten(sets, lernen, einstellungen)
 
     engine = QQmlApplicationEngine()
@@ -96,6 +98,7 @@ def run() -> int:
     ctx.setContextProperty("lernen", lernen)
     ctx.setContextProperty("sets", sets)
     ctx.setContextProperty("einstellungen", einstellungen)
+    ctx.setContextProperty("marktplatz", markt)
 
     engine.load(QUrl.fromLocalFile(str(QML_DIR / "Main.qml")))
     if not engine.rootObjects():

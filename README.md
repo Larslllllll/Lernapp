@@ -26,10 +26,15 @@ macOS ist geplant, existiert aber noch nicht.
 
 ## Fertige Lernsets
 
-Wer nicht bei null anfangen will, findet unter
-[Lernapp-lernsets](https://github.com/Larslllllll/Lernapp-lernsets) fertige Sammlungen zum Herunterladen und
-Importieren — aktuell 24 Sets aus Französisch, Englisch und Latein.
-Eigene beisteuern geht per Pull Request.
+In der App auf **Marktplatz** klicken: LernApp lädt das Verzeichnis aus
+[Lernapp-lernsets](https://github.com/Larslllllll/Lernapp-lernsets), zeigt alle
+Sammlungen mit Fach und Umfang, und ein Klick übernimmt eine davon — sie landet
+gleich im passenden Ordner. Heruntergeladen wird nur, was der SHA-256-Summe aus
+dem Verzeichnis entspricht.
+
+Aktuell 24 Sets aus Französisch, Englisch und Latein. Eigene beisteuern geht per
+Pull Request. Ohne Internet ändert sich nichts: der Marktplatz meldet sich und
+bleibt sonst still, gelernt wird weiter.
 
 ## Was die App kann
 

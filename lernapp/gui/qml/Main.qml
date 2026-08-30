@@ -65,6 +65,7 @@ ApplicationWindow {
             Layout.fillHeight: true
             onBearbeiten: function(lernsetId) { dialog.oeffnenBearbeiten(lernsetId) }
             onNeuAnlegen: function(ordner) { dialog.oeffnenNeu(ordner) }
+            onMarktplatzOeffnen: marktplatzDialog.oeffnen()
         }
 
         Rectangle {
@@ -89,11 +90,24 @@ ApplicationWindow {
         }
     }
 
+    MarktplatzDialog {
+        id: marktplatzDialog
+        anchors.centerIn: Overlay.overlay
+    }
+
     // Fehlermeldungen aus den ViewModels sichtbar machen.
     Connections {
         target: sets
         function onFehler(text) { hinweis.zeige(text, true) }
         function onHinweis(text) { hinweis.zeige(text, false) }
+    }
+
+    Connections {
+        target: marktplatz
+        function onFehler(text) { hinweis.zeige(text, true) }
+        function onHinweis(text) { hinweis.zeige(text, false) }
+        // Ein uebernommenes Lernset soll sofort in der Seitenleiste stehen.
+        function onUebernommen(lernsetId) { sets.aktualisiere() }
     }
 
     Rectangle {

@@ -14,8 +14,8 @@ from PySide6.QtCore import Property, QObject, QUrl, Signal, Slot
 from lernapp import __version__
 from lernapp.core.cards import TripleCard
 from lernapp.core.import_export import dateiname_fuer, parse_text
-from lernapp.netz import ki, lernset_ki
-from lernapp.storage import dokumente
+from lernapp.netz import vokabel_dienst
+from lernapp.storage import dokumente, paths
 from lernapp.storage import local_storage as store
 
 from . import arbeit
@@ -260,8 +260,8 @@ class SetsViewModel(QObject):
 
     @Property(bool, notify=erkennungGeaendert)
     def kiVerfuegbar(self) -> bool:
-        """Ohne eingerichteten Zugang bleibt der Knopf aus, statt zu scheitern."""
-        return ki.aus_umgebung().bereit
+        """Ohne Weg zum Modell bleibt der Knopf verborgen, statt zu scheitern."""
+        return vokabel_dienst.verfuegbar()
 
     @Slot(str)
     def ausDokument(self, quell_url: str) -> None:
@@ -278,12 +278,14 @@ class SetsViewModel(QObject):
         self._erkennung_laeuft = True
         self.erkennungGeaendert.emit()
 
+        basis = self._state._basis or paths.datenverzeichnis()
+
         def arbeiten():
             text = dokumente.lies_text(pfad)
-            return lernset_ki.erkenne_vokabeln(ki.aus_umgebung(), text)
+            return vokabel_dienst.erkenne(text, basis)
 
         arbeit.starte(arbeiten, self._vokabeln_da, self._erkennung_fehler,
-                      (dokumente.DokumentFehler, ki.KIFehler))
+                      (dokumente.DokumentFehler, vokabel_dienst.KIFehler))
 
     def _vokabeln_da(self, vorschlag) -> None:
         self._erkennung_laeuft = False

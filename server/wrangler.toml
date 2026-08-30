@@ -1,0 +1,12 @@
+name = "lernapp-vokabeln"
+main = "worker.js"
+compatibility_date = "2026-08-30"
+
+# Zaehler fuer die Deckel: pro Geraet und pro Tag insgesamt.
+# Die id traegt Lars nach `wrangler kv namespace create ZAEHLER` hier ein.
+[[kv_namespaces]]
+binding = "ZAEHLER"
+id = "HIER_DIE_ID_EINTRAGEN"
+
+# Der Schluessel steht NICHT hier, sondern wird als Secret gesetzt:
+#   wrangler secret put NOUS_API_KEY

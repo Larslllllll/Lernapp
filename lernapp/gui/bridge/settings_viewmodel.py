@@ -1,6 +1,6 @@
-"""ViewModel fuer Einstellungen: Theme, Lernrichtung, Ton.
+"""ViewModel für Einstellungen: Theme, Lernrichtung, Ton.
 
-Haelt nur Zustand und Persistenz - keine Lernregeln.
+Hält nur Zustand und Persistenz - keine Lernregeln.
 """
 from __future__ import annotations
 
@@ -88,17 +88,17 @@ class SettingsViewModel(QObject):
         """False heisst: das System kann hier keinen Ton abspielen."""
         return dienste().unterstuetzt_ton()
 
-    # -- Tastenkuerzel --------------------------------------------------------
+    # -- Tastenkürzel --------------------------------------------------------
 
     @Property("QVariantMap", constant=True)
     def kuerzel(self) -> dict:
         """Aktionsname -> Tastenfolge, von der Plattformschicht bestimmt.
 
-        Die Oberflaeche verdrahtet nie selbst eine Kombination.
+        Die Oberfläche verdrahtet nie selbst eine Kombination.
         """
         return dict(dienste().tastenkuerzel())
 
-    # -- Fenstergroesse merken ------------------------------------------------
+    # -- Fenstergröße merken ------------------------------------------------
 
     @Property(int, constant=True)
     def fensterBreite(self) -> int:

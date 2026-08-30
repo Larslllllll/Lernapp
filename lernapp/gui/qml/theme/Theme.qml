@@ -1,4 +1,4 @@
-// Zentrale Design-Tokens. Einzige Quelle fuer Farben, Radien und Zeiten.
+// Zentrale Design-Tokens. Einzige Quelle für Farben, Radien und Zeiten.
 // Dark und Light teilen dieselbe semantische Struktur - es wechseln nur die
 // Werte, nie die Namen.
 pragma Singleton
@@ -10,7 +10,7 @@ QtObject {
     // Wird von Main.qml aus dem SettingsViewModel gesetzt.
     property bool dark: true
 
-    // -- Flaechen -------------------------------------------------------------
+    // -- Flächen -------------------------------------------------------------
     readonly property color background:      dark ? "#0f1115" : "#f4f5f8"
     readonly property color surface:         dark ? "#171a21" : "#ffffff"
     readonly property color surfaceElevated: dark ? "#1e222b" : "#ffffff"
@@ -43,7 +43,7 @@ QtObject {
     readonly property int radiusGross: 18
     readonly property int radiusRund: 999
 
-    // -- Abstaende ------------------------------------------------------------
+    // -- Abstände ------------------------------------------------------------
     readonly property int abstandXs: 6
     readonly property int abstandS: 10
     readonly property int abstandM: 16

@@ -2,14 +2,14 @@
 
     .venv/Scripts/python.exe packaging/icon_bauen.py
 
-Windows waehlt je nach Ort eine andere Groesse aus der Datei: 16 px in der
+Windows wählt je nach Ort eine andere Größe aus der Datei: 16 px in der
 Titelleiste, 32 px in der Taskleiste, 48 px im Explorer, 256 px in der
-Kachelansicht. Eine .ico mit nur einer Groesse laesst Windows selbst
+Kachelansicht. Eine .ico mit nur einer Größe lässt Windows selbst
 herunterrechnen, und das sieht bei 16 px sichtbar matschig aus.
 
 Die Quelle hat rundherum Leerraum um die abgerundete Kachel. Der wird
 abgeschnitten, sonst schrumpft das eigentliche Zeichen in der Taskleiste auf
-zwei Drittel der verfuegbaren Flaeche.
+zwei Drittel der verfügbaren Fläche.
 """
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ WURZEL = Path(__file__).resolve().parent.parent
 QUELLE = WURZEL / "packaging" / "icon-quelle.png"
 ZIEL = WURZEL / "ico.ico"
 
-# Was Windows tatsaechlich abfragt. 256 kommt als PNG in die Datei, der Rest
+# Was Windows tatsächlich abfragt. 256 kommt als PNG in die Datei, der Rest
 # als BMP - das ist die Aufteilung, die auch Inno Setup ohne Murren frisst.
 GROESSEN = [16, 24, 32, 48, 64, 128, 256]
 
@@ -68,7 +68,7 @@ def quadratisch(kasten: tuple[int, int, int, int],
                 groesse: tuple[int, int]) -> tuple[int, int, int, int]:
     """Den Ausschnitt auf ein Quadrat erweitern, mittig, innerhalb des Bildes.
 
-    Ein nicht quadratischer Ausschnitt wuerde beim Skalieren verzerren.
+    Ein nicht quadratischer Ausschnitt würde beim Skalieren verzerren.
     """
     links, oben, rechts, unten = kasten
     breite, hoehe = rechts - links, unten - oben
@@ -90,8 +90,8 @@ def main() -> int:
     kasten = quadratisch(kachel_finden(bild), bild.size)
     ausschnitt = bild.crop(kasten)
 
-    # LANCZOS statt der Voreinstellung: bei 16 px entscheidet die Qualitaet
-    # des Herunterrechnens darueber, ob das Zeichen noch erkennbar ist.
+    # LANCZOS statt der Voreinstellung: bei 16 px entscheidet die Qualität
+    # des Herunterrechnens darüber, ob das Zeichen noch erkennbar ist.
     groesste = ausschnitt.resize((256, 256), Image.LANCZOS)
     groesste.save(ZIEL, format="ICO", sizes=[(g, g) for g in GROESSEN])
 

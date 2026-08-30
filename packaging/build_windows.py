@@ -2,9 +2,9 @@
 
     .venv/Scripts/python.exe packaging/build_windows.py
 
-Prueft zuerst die Voraussetzungen, baut dann ueber packaging/lernapp.spec und
-meldet am Ende Groesse und Inhalt. Es wird nichts nachtraeglich geloescht -
-nicht benoetigte Qt-Module sind gar nicht erst installiert.
+Prüft zuerst die Voraussetzungen, baut dann über packaging/lernapp.spec und
+meldet am Ende Größe und Inhalt. Es wird nichts nachträglich gelöscht -
+nicht benötigte Qt-Module sind gar nicht erst installiert.
 """
 from __future__ import annotations
 
@@ -26,23 +26,23 @@ ISS = WURZEL / "packaging" / "lernapp.iss"
 DIST = WURZEL / "dist"
 # Arbeitsordner UND fertiges Bundle liegen ausserhalb des Projekts. Das
 # Projekt liegt in OneDrive, und der Sync-Dienst greift sich jede der 2000
-# Dateien sofort - das bremst den Build und laesst ihn beim naechsten Lauf am
-# Aufraeumen scheitern (WinError 5, obwohl nichts laeuft). Beides ist reiner
-# Zwischenstand und gehoert nirgends hin, wo es gesichert wird.
+# Dateien sofort - das bremst den Build und lässt ihn beim nächsten Lauf am
+# Aufräumen scheitern (WinError 5, obwohl nichts läuft). Beides ist reiner
+# Zwischenstand und gehört nirgends hin, wo es gesichert wird.
 #
 # In dist/ landet nur die fertige Setup-Datei - eine einzelne Datei, die der
-# Sync problemlos vertraegt, und genau die, die release.py hochlaedt.
+# Sync problemlos verträgt, und genau die, die release.py hochlädt.
 WORK = Path(tempfile.gettempdir()) / "lernapp-pyinstaller"
 BUNDLE = Path(tempfile.gettempdir()) / "lernapp-bundle"
 ZIEL = BUNDLE / "LernApp"
 
 # So oft wird ein gesperrter Ordner erneut angefasst, bevor aufgegeben wird.
-# Das Projekt liegt in OneDrive, und der Sync haelt nach einem Build gern
+# Das Projekt liegt in OneDrive, und der Sync hält nach einem Build gern
 # noch Sekunden lang einen Handle auf die 2000 frisch geschriebenen Dateien.
 VERSUCHE = 6
 
-# Diese Qt-Bibliotheken laedt die App zur Laufzeit. Fehlt eine davon im
-# Bundle, ist der Build kaputt - unabhaengig davon, ob er durchlaeuft.
+# Diese Qt-Bibliotheken lädt die App zur Laufzeit. Fehlt eine davon im
+# Bundle, ist der Build kaputt - unabhängig davon, ob er durchläuft.
 ERWARTETE_QT_MODULE = [
     "Qt6Core.dll", "Qt6Gui.dll", "Qt6Qml.dll", "Qt6Quick.dll",
     "Qt6QuickControls2.dll", "Qt6QuickTemplates2.dll", "Qt6QuickLayouts.dll",
@@ -50,7 +50,7 @@ ERWARTETE_QT_MODULE = [
     "Qt6QuickDialogs2.dll", "Qt6QuickDialogs2QuickImpl.dll",
 ]
 
-# Diese duerfen NIE auftauchen - sie stecken in PySide6-Addons.
+# Diese dürfen NIE auftauchen - sie stecken in PySide6-Addons.
 VERBOTENE_QT_MODULE = [
     "Qt6WebEngineCore.dll", "Qt63DCore.dll", "Qt6Charts.dll",
     "Qt6DataVisualization.dll", "Qt6Multimedia.dll",
@@ -71,7 +71,7 @@ def pruefe_umgebung() -> None:
     site = Path(sys.prefix) / "Lib" / "site-packages" / "PySide6"
     if (site / "Qt6WebEngineCore.dll").exists():
         fehler(
-            "PySide6-Addons ist installiert - das Bundle wuerde 194 MB WebEngine "
+            "PySide6-Addons ist installiert - das Bundle würde 194 MB WebEngine "
             "mitschleppen.\n       pip uninstall PySide6 PySide6_Addons\n"
             "       pip install --force-reinstall --no-deps PySide6-Essentials"
         )
@@ -82,11 +82,11 @@ def pruefe_umgebung() -> None:
 
 
 def _aufraeumen(ordner: Path) -> None:
-    """Inhalt loeschen, den Ordner selbst stehen lassen.
+    """Inhalt löschen, den Ordner selbst stehen lassen.
 
-    Auf einem OneDrive-Laufwerk haelt der Sync-Dienst gern einen Handle auf
+    Auf einem OneDrive-Laufwerk hält der Sync-Dienst gern einen Handle auf
     das Verzeichnis; ein rmtree auf den Ordner selbst scheitert dann mit
-    WinError 5, obwohl der Inhalt loeschbar ist.
+    WinError 5, obwohl der Inhalt löschbar ist.
     """
     if not ordner.exists():
         return
@@ -101,8 +101,8 @@ def _aufraeumen(ordner: Path) -> None:
             except PermissionError:
                 if versuch == VERSUCHE - 1:
                     fehler(
-                        f"{eintrag} laesst sich nicht loeschen.\n"
-                        "       Laeuft die App noch? Sonst haelt der OneDrive-Sync\n"
+                        f"{eintrag} lässt sich nicht löschen.\n"
+                        "       Läuft die App noch? Sonst hält der OneDrive-Sync\n"
                         "       den Ordner fest - kurz warten und erneut starten."
                     )
                 # Wachsende Wartezeit: der Sync gibt den Ordner nach ein paar

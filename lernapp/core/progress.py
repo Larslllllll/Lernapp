@@ -1,15 +1,15 @@
 """Fortschritt eines Lernsets - ohne GUI, ohne Datei-I/O.
 
-Zwei Trennungen, die die Vorgaengerversion nicht hatte:
+Zwei Trennungen, die die Vorgängerversion nicht hatte:
 
   round_errors  vs  total_errors
       round_errors steuert Wiederholung und Kartengewichtung und wird zu
-      Rundenbeginn geleert. total_errors ist die Historie fuer die Statistik
+      Rundenbeginn geleert. total_errors ist die Historie für die Statistik
       und bleibt erhalten.
 
   current_combo vs  best_combo
-      current_combo faellt bei einer falschen Antwort auf 0. best_combo haelt
-      den Hoechstwert fest.
+      current_combo fällt bei einer falschen Antwort auf 0. best_combo hält
+      den Höchstwert fest.
 """
 from __future__ import annotations
 
@@ -43,9 +43,9 @@ class SetProgress:
         return self.total_correct / gesamt if gesamt else 0.0
 
     def richtig(self, keys: list[str]) -> tuple[int, bool]:
-        """Verbucht eine richtige Antwort. Gibt (xp_gewinn, level_up) zurueck.
+        """Verbucht eine richtige Antwort. Gibt (xp_gewinn, level_up) zurück.
 
-        `keys` sind alle Streak-Schluessel, die mitziehen - bei einem Triple
+        `keys` sind alle Streak-Schlüssel, die mitziehen - bei einem Triple
         also alle drei Karten des Pakets.
         """
         vorher = self.level
@@ -59,7 +59,7 @@ class SetProgress:
         return gewinn, self.level > vorher
 
     def falsch(self, keys: list[str]) -> None:
-        """Verbucht eine falsche Antwort und setzt das ganze Paket zurueck."""
+        """Verbucht eine falsche Antwort und setzt das ganze Paket zurück."""
         self.current_combo = 0
         self.total_wrong += 1
         for k in keys:
@@ -85,7 +85,7 @@ class SetProgress:
             self.streaks[k] = 0
 
     def gewicht(self, key: str) -> int:
-        """Auswahlgewicht einer Karte - haeufige Fehler kommen oefter dran."""
+        """Auswahlgewicht einer Karte - häufige Fehler kommen öfter dran."""
         return max(1, self.round_errors.get(key, 0) * 3 + 1)
 
     # ── Serialisierung ────────────────────────────────────────────────────────
@@ -95,10 +95,10 @@ class SetProgress:
         """Liest altes UND neues Format.
 
         Altes Format kannte nur `errors` (Rundenfehler) und `combo`
-        (laufende Combo). Beides wird uebernommen, ohne Informationsverlust:
-        `errors` fuellt zusaetzlich total_errors, `combo` wird als bisheriger
-        Rekord nach best_combo uebernommen. Die laufende Combo startet bei 0 -
-        ein Multiplikator darf einen Programmneustart nicht ueberleben.
+        (laufende Combo). Beides wird übernommen, ohne Informationsverlust:
+        `errors` füllt zusätzlich total_errors, `combo` wird als bisheriger
+        Rekord nach best_combo übernommen. Die laufende Combo startet bei 0 -
+        ein Multiplikator darf einen Programmneustart nicht überleben.
         """
         errors = dict(roh.get("errors", {}))
         return cls(
@@ -113,9 +113,9 @@ class SetProgress:
         )
 
     def to_legacy(self) -> dict:
-        """Schreibt additiv: alte Schluessel bleiben erhalten, neue kommen dazu.
+        """Schreibt additiv: alte Schlüssel bleiben erhalten, neue kommen dazu.
 
-        Dadurch kann eine aeltere Programmversion die Datei weiterhin lesen.
+        Dadurch kann eine ältere Programmversion die Datei weiterhin lesen.
         """
         return {
             "schema_version": SCHEMA_VERSION,

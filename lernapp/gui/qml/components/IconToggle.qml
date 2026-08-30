@@ -1,4 +1,4 @@
-// Kleiner Schalter mit Symbol fuer die Kopfzeile der Seitenleiste.
+// Kleiner Schalter mit Symbol für die Kopfzeile der Seitenleiste.
 import QtQuick
 import QtQuick.Controls.Basic
 import theme

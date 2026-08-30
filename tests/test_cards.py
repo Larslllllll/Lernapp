@@ -1,4 +1,4 @@
-"""Tests fuer das Kartenmodell und das Parsen des Legacy-Formats."""
+"""Tests für das Kartenmodell und das Parsen des Legacy-Formats."""
 import pytest
 
 from lernapp.core.cards import (
@@ -85,7 +85,7 @@ def test_slots_liefern_anzeigeplan():
 # ihnen zerbrochen.
 
 def test_regression_mehrwortige_form_am_ende():
-    """'been able' wurde von q.split() zu 'been' verstuemmelt."""
+    """'been able' wurde von q.split() zu 'been' verstümmelt."""
     c = parse_card({"q": "___ ___ been able", "a": "can, could"})
     assert c.forms == ("can", "could", "been able")
     assert c.revealed == 2
@@ -93,7 +93,7 @@ def test_regression_mehrwortige_form_am_ende():
 
 
 def test_regression_mehrwortige_form_in_der_mitte_ist_loesbar():
-    """'___ had to ___' erzeugte nur EIN Eingabefeld und war nie loesbar."""
+    """'___ had to ___' erzeugte nur EIN Eingabefeld und war nie lösbar."""
     c = parse_card({"q": "___ had to ___", "a": "must, had to"})
     assert c.forms == ("must", "had to", "had to")
     assert c.revealed == 1
@@ -134,12 +134,12 @@ def test_regression_can_could_been_able_ist_ein_paket():
     {"q": "___ had to ___", "a": "must, had to"},
 ])
 def test_roundtrip_ist_verlustfrei(item):
-    """Der Legacy-Schluessel muss exakt erhalten bleiben - progress.json
+    """Der Legacy-Schlüssel muss exakt erhalten bleiben - progress.json
     indiziert historisch nach der Frage-Zeichenkette."""
     assert parse_card(item).legacy_item() == item
 
 
-# -- Zaehlung -----------------------------------------------------------------
+# -- Zählung -----------------------------------------------------------------
 
 def test_triple_paket_zaehlt_als_eine_lerneinheit():
     karten = parse_items([
@@ -156,13 +156,13 @@ def test_triple_paket_zaehlt_als_eine_lerneinheit():
 
 @pytest.mark.parametrize("item", [
     {"q": "___ ___ ___", "a": "a, b"},        # keine sichtbare Form
-    {"q": "go ___", "a": "went"},             # nur eine Luecke
-    {"q": "go ___ ___ ___", "a": "a, b"},     # drei Luecken
+    {"q": "go ___", "a": "went"},             # nur eine Lücke
+    {"q": "go ___ ___ ___", "a": "a, b"},     # drei Lücken
     {"q": "go ___ ___", "a": "nur eine"},     # nur eine Antwort
     {"q": "go ___ ___", "a": "a, "},          # leere zweite Antwort
 ])
 def test_unsauberes_triple_faellt_auf_normale_karte_zurueck(item):
-    """Lieber als normale Karte behandeln als abstuerzen."""
+    """Lieber als normale Karte behandeln als abstürzen."""
     c = parse_card(item)
     assert not c.is_triple
     assert c.legacy_item() == item

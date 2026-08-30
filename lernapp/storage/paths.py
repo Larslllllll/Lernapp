@@ -1,11 +1,11 @@
 """Speicherorte.
 
-Phase 1 aendert bewusst NICHTS am Ablageort: die Daten bleiben in
-``~/.lernapp``, damit bestehende Nutzerdaten unveraendert weiterverwendet
+Phase 1 ändert bewusst NICHTS am Ablageort: die Daten bleiben in
+``~/.lernapp``, damit bestehende Nutzerdaten unverändert weiterverwendet
 werden. Die plattformspezifischen Zielpfade (%LOCALAPPDATA% bzw.
 ~/Library/Application Support) sind hier bereits benannt, werden aber erst in
 Phase 2 aktiviert - eine Verschiebung ist eine Migration mit echtem Risiko und
-gehoert nicht in einen reinen Core-Refactor.
+gehört nicht in einen reinen Core-Refactor.
 """
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ LEGACY_DIR = Path.home() / ".lernapp"
 
 
 def plattform_datenverzeichnis() -> Path:
-    """Der plattformuebliche Ort. Noch nicht aktiv - siehe Modul-Docstring."""
+    """Der plattformübliche Ort. Noch nicht aktiv - siehe Modul-Docstring."""
     if sys.platform == "win32":
         basis = os.environ.get("LOCALAPPDATA")
         return Path(basis) / APP_NAME if basis else LEGACY_DIR
@@ -32,7 +32,7 @@ def plattform_datenverzeichnis() -> Path:
 def datenverzeichnis() -> Path:
     """Aktiv genutztes Verzeichnis.
 
-    LERNAPP_DATA_DIR lenkt den Ablageort um - gedacht fuer Entwicklung und
+    LERNAPP_DATA_DIR lenkt den Ablageort um - gedacht für Entwicklung und
     Tests, damit nie versehentlich gegen die echten Nutzerdaten gearbeitet
     wird. Ohne die Variable bleibt alles beim historischen Ort.
     """

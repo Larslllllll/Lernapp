@@ -1,9 +1,9 @@
 """Schema-Migrationen.
 
 Regeln:
-  * idempotent    - zweimal laufen aendert nichts
-  * deterministisch bis auf neu vergebene UUIDs fuer fehlende IDs
-  * nie loeschend - unbekannte Felder bleiben unangetastet erhalten
+  * idempotent    - zweimal laufen ändert nichts
+  * deterministisch bis auf neu vergebene UUIDs für fehlende IDs
+  * nie löschend - unbekannte Felder bleiben unangetastet erhalten
 
 Aktueller Stand: v1 (kein schema_version-Feld) -> v2.
 """
@@ -38,8 +38,8 @@ def migriere_data(roh: dict) -> dict:
 def migriere_progress(roh: dict) -> dict:
     """Fortschrittsdatei auf den aktuellen Stand bringen.
 
-    Laeuft jeden Eintrag durch SetProgress, wodurch best_combo und
-    total_errors ergaenzt werden, ohne bestehende Werte zu verlieren.
+    Läuft jeden Eintrag durch SetProgress, wodurch best_combo und
+    total_errors ergänzt werden, ohne bestehende Werte zu verlieren.
     """
     if not roh:
         return {}

@@ -1,8 +1,8 @@
 """Das Marktplatz-ViewModel - ohne Netz und ohne Thread-Pool.
 
-Der Lader wird hereingereicht und `synchron=True` laesst die Arbeit im
-aufrufenden Faden laufen. Sonst muesste jeder Test auf einen Thread warten,
-und ein haengender Test waere schlimmer als gar keiner.
+Der Lader wird hereingereicht und `synchron=True` lässt die Arbeit im
+aufrufenden Faden laufen. Sonst müsste jeder Test auf einen Thread warten,
+und ein hängender Test wäre schlimmer als gar keiner.
 """
 import hashlib
 import json
@@ -87,7 +87,7 @@ def test_katalog_laden_fuellt_die_liste(vm):
 
 
 def test_bereits_vorhandene_lernsets_sind_markiert(vm):
-    """Sonst laedt jemand dreimal dasselbe herunter."""
+    """Sonst lädt jemand dreimal dasselbe herunter."""
     vm.aktualisieren()
     nach_namen = {e["name"]: e["vorhanden"] for e in vm.eintraege}
     assert nach_namen == {"Headway Unit 4": True, "Vokabeln": False}
@@ -165,7 +165,7 @@ def test_kein_netz_meldet_sich_und_blockiert_nichts(tmp_path):
     assert meldungen == ["Keine Verbindung zum Marktplatz."]
     assert vm.eintraege == []
     assert vm.laedt is False
-    # Die eigenen Lernsets sind unberuehrt.
+    # Die eigenen Lernsets sind unberührt.
     assert [ls["name"] for _, ls in vm._state.alle_lernsets()] == ["Headway Unit 4"]
 
 

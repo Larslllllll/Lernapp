@@ -1,6 +1,6 @@
 // Seitenleiste: Ordner und Lernsets.
-// Drag & Drop ist eine Bequemlichkeit - jede Aktion ist auch ueber das
-// Kontextmenue erreichbar.
+// Drag & Drop ist eine Bequemlichkeit - jede Aktion ist auch über das
+// Kontextmenü erreichbar.
 import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Dialogs
@@ -263,7 +263,7 @@ Rectangle {
         }
     }
 
-    // -- Kontextmenue ---------------------------------------------------------
+    // -- Kontextmenü ---------------------------------------------------------
     Menu {
         id: kontext
         property string lernsetId: ""

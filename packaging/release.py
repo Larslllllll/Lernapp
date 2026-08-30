@@ -1,15 +1,15 @@
-"""Ein Release veroeffentlichen.
+"""Ein Release veröffentlichen.
 
     .venv/Scripts/python.exe packaging/release.py                  # nur vorbereiten
-    .venv/Scripts/python.exe packaging/release.py --veroeffentlichen
+    .venv/Scripts/python.exe packaging/release.py --veröffentlichen
 
-Ohne Flag geht nichts nach aussen: das Skript prueft die gebaute Setup-Datei,
+Ohne Flag geht nichts nach aussen: das Skript prüft die gebaute Setup-Datei,
 bildet die SHA-256-Summe, schreibt latest.json und meldet, was passieren
-wuerde. Erst --veroeffentlichen committet latest.json, schiebt den Zweig hoch
+würde. Erst --veröffentlichen committet latest.json, schiebt den Zweig hoch
 und legt das GitHub-Release mit der Setup-Datei an.
 
 Reihenfolge ist Absicht: das Release mit der Datei entsteht ZUERST, latest.json
-wird ZULETZT hochgeschoben. latest.json ist der Schalter, der eine Version fuer
+wird ZULETZT hochgeschoben. latest.json ist der Schalter, der eine Version für
 alle scharf stellt - er darf nie auf eine Datei zeigen, die es noch nicht gibt.
 """
 from __future__ import annotations
@@ -33,7 +33,7 @@ VOLLNAME = f"{BESITZER}/{REPO}"
 ZWEIG = "main"
 
 DIST = WURZEL / "dist"
-# latest.json liegt im Repo, nicht in dist/: install.ps1 liest es ueber
+# latest.json liegt im Repo, nicht in dist/: install.ps1 liest es über
 # raw.githubusercontent, und so ist es genau eine Datei unter Versionskontrolle
 # statt einer Kopie, die auseinanderlaufen kann.
 MANIFEST = WURZEL / "latest.json"
@@ -80,9 +80,9 @@ def sha256(pfad: Path) -> str:
 def manifest_schreiben(pruefsumme: str, groesse: int) -> dict:
     """Das Manifest, das install.ps1 liest.
 
-    Die Feldnamen sind oeffentliche Schnittstelle: eine aeltere install.ps1,
+    Die Feldnamen sind öffentliche Schnittstelle: eine ältere install.ps1,
     die noch bei jemandem im Verlauf steht, muss sie weiter finden. Neue
-    Felder duerfen dazukommen, vorhandene nicht verschwinden.
+    Felder dürfen dazukommen, vorhandene nicht verschwinden.
     """
     daten = {
         "version": __version__,
@@ -112,7 +112,7 @@ def release_anlegen(setup: Path) -> None:
         print(f"  Release        {marke} (Datei ersetzt)")
         return
     notizen = (
-        f"LernApp {__version__} fuer Windows 11.\n\n"
+        f"LernApp {__version__} für Windows 11.\n\n"
         "Installation ohne Herunterladen und Doppelklick:\n\n"
         "```powershell\n"
         f"iex (irm https://raw.githubusercontent.com/{VOLLNAME}/{ZWEIG}/install.ps1)\n"

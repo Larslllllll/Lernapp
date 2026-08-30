@@ -1,4 +1,4 @@
-"""Tests fuer Speicherung und Migrationen.
+"""Tests für Speicherung und Migrationen.
 
 Alle Tests arbeiten in tmp_path - die echten Nutzerdaten werden nie angefasst.
 """
@@ -35,7 +35,7 @@ ALTER_PROGRESS = {
 
 @pytest.fixture(autouse=True)
 def _kein_backup_zustand():
-    """Backup-Merker zwischen Tests zuruecksetzen."""
+    """Backup-Merker zwischen Tests zurücksetzen."""
     store._backup_gemacht.clear()
     yield
     store._backup_gemacht.clear()
@@ -174,7 +174,7 @@ def test_progress_migration_vertraegt_leere_datei():
 
 
 def test_progress_migration_bleibt_lesbar_fuer_alte_version():
-    """Additive Migration: die alten Schluessel muessen erhalten bleiben."""
+    """Additive Migration: die alten Schlüssel müssen erhalten bleiben."""
     neu = migriere_progress(ALTER_PROGRESS)["abc"]
     for schluessel in ("xp", "correct", "wrong", "errors", "combo", "streaks"):
         assert schluessel in neu

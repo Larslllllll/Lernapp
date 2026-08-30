@@ -1,6 +1,6 @@
-// Marktplatz: fertige Lernsets direkt aus dem Netz uebernehmen.
+// Marktplatz: fertige Lernsets direkt aus dem Netz übernehmen.
 //
-// Stellt nur dar. Laden, Pruefsumme und Ablage macht das ViewModel; hier
+// Stellt nur dar. Laden, Prüfsumme und Ablage macht das ViewModel; hier
 // steht keine Schwelle und keine Regel.
 import QtQuick
 import QtQuick.Controls.Basic
@@ -16,7 +16,7 @@ Dialog {
     height: 620
     closePolicy: Popup.CloseOnEscape
 
-    // Leerer Filter heisst: alle Faecher.
+    // Leerer Filter heisst: alle Fächer.
     property string fach: ""
 
     function oeffnen() {
@@ -181,8 +181,8 @@ Dialog {
             }
         }
 
-        // Leerer Zustand. Ohne den steht der Nutzer vor einer weissen Flaeche
-        // und weiss nicht, ob es laedt oder kaputt ist.
+        // Leerer Zustand. Ohne den steht der Nutzer vor einer weissen Fläche
+        // und weiss nicht, ob es lädt oder kaputt ist.
         ColumnLayout {
             anchors.centerIn: parent
             width: parent.width - 2 * Theme.abstandXl

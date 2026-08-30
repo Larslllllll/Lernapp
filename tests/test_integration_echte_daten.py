@@ -1,7 +1,7 @@
 """Integrationstest gegen die echten Nutzerdaten.
 
 Ausschliesslich lesend - data.json und progress.json werden nie geschrieben.
-Wird uebersprungen, wenn keine lokalen Daten vorhanden sind (z.B. auf einem
+Wird übersprungen, wenn keine lokalen Daten vorhanden sind (z.B. auf einem
 frischen Rechner oder in CI).
 """
 import json
@@ -46,7 +46,7 @@ def alle_lernsets(echte_daten):
 # -- Parsing ------------------------------------------------------------------
 
 def test_alle_karten_parsen_verlustfrei(alle_lernsets):
-    """Jede Karte muss exakt in ihr Ursprungsformat zurueckschreibbar sein."""
+    """Jede Karte muss exakt in ihr Ursprungsformat zurückschreibbar sein."""
     abweichungen = []
     for _fname, ls in alle_lernsets:
         for original, karte in zip(ls["items"], parse_items(ls["items"])):
@@ -73,10 +73,10 @@ def test_jedes_triple_paket_ist_vollstaendig(alle_lernsets):
     assert unvollstaendig == []
 
 
-# -- Vollstaendiger Durchlauf --------------------------------------------------
+# -- Vollständiger Durchlauf --------------------------------------------------
 
 def test_jedes_lernset_ist_vollstaendig_lernbar(alle_lernsets):
-    """Kernaussage von Phase 1: kein Lernset enthaelt eine unloesbare Karte.
+    """Kernaussage von Phase 1: kein Lernset enthält eine unlösbare Karte.
 
     Vorher blockierte '___ had to ___' das englische Verbenset dauerhaft.
     """
@@ -92,8 +92,8 @@ def test_jedes_lernset_ist_vollstaendig_lernbar(alle_lernsets):
         grenze = len(ls["items"]) * 4 + 50
         while (f := s.naechste_frage()) is not None and schritte < grenze:
             schritte += 1
-            # Bei Alternativantworten ("a, b") zaehlt genau eine Variante,
-            # nicht die ganze Zeichenkette - so verhaelt sich auch die App.
+            # Bei Alternativantworten ("a, b") zählt genau eine Variante,
+            # nicht die ganze Zeichenkette - so verhält sich auch die App.
             antwort = (list(f.card.erwartet) if f.ist_triple
                        else f.card.akzeptierte_antworten(False)[0])
             ergebnis = s.antworte(antwort)

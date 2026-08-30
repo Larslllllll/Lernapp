@@ -1,4 +1,4 @@
-"""Tests fuer Import und Export von Lernsets."""
+"""Tests für Import und Export von Lernsets."""
 import pytest
 
 from lernapp.core.cards import gruppiere_pakete, lerneinheiten, parse_items
@@ -73,7 +73,7 @@ def test_drei_felder_ergeben_ein_paket():
 
 
 def test_mehrwortige_formen_im_import():
-    """Genau der Fall, an dem die Vorgaengerversion zerbrochen ist."""
+    """Genau der Fall, an dem die Vorgängerversion zerbrochen ist."""
     ergebnis = parse_text("can;could;been able\nmust;had to;had to")
     assert ergebnis.pakete == 2
     karten = parse_items(ergebnis.items)

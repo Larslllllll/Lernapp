@@ -103,7 +103,7 @@ def test_triple_paket_zaehlt_als_eine_einheit_in_der_seitenleiste(vms):
     _e, _l, sets = vms
     englisch = next(o for o in sets.ordner if o["name"] == "Englisch")
     verben = englisch["lernsets"][0]
-    # 4 Karten auf der Platte = 1 vollstaendiges Paket + 1 Einzelkarte
+    # 4 Karten auf der Platte = 1 vollständiges Paket + 1 Einzelkarte
     assert verben["karten"] == 2, "Pakete zaehlen als eins, nicht als drei"
 
 
@@ -227,7 +227,7 @@ def test_triple_karte_liefert_zwei_eingabefelder(vms):
 
 
 def test_regression_had_to_karte_ist_ueber_das_viewmodel_loesbar(vms):
-    """Die Karte, die in der alten App nie loesbar war."""
+    """Die Karte, die in der alten App nie lösbar war."""
     _e, lernen, sets = vms
     sets.waehle("set-b")
     for _ in range(80):
@@ -330,7 +330,7 @@ def test_ohne_lernset_passiert_nichts(state):
     assert lernen.frageTyp == "leer"
 
 
-# -- Ton und Tastenkuerzel ----------------------------------------------------
+# -- Ton und Tastenkürzel ----------------------------------------------------
 
 def test_ton_laesst_sich_umschalten_und_wird_gespeichert(state):
     vm = SettingsViewModel(state)
@@ -417,12 +417,12 @@ def test_export_von_unbekanntem_lernset_meldet_fehler(vms, tmp_path):
 
 
 def test_geteiltes_lernset_landet_in_einer_anderen_installation(vms, tmp_path):
-    """Der Weg, der beim Teilen mit Klassenkameraden zaehlt."""
+    """Der Weg, der beim Teilen mit Klassenkameraden zählt."""
     _e, _l, sets = vms
     datei = tmp_path / "geteilt.lernset.json"
     assert sets.exportiereLernset("set-b", str(datei)) is True
 
-    # Zweite, voellig getrennte Installation
+    # Zweite, völlig getrennte Installation
     fremd_basis = tmp_path / "andere_installation"
     fremd_basis.mkdir()
     fremd = SetsViewModel(AppState(fremd_basis))

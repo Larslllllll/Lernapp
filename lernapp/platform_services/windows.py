@@ -20,7 +20,7 @@ class WindowsDienste(BasisDienste):
         """Anwendungs-ID setzen.
 
         Ohne sie gruppiert Windows die App unter "Python" statt unter LernApp,
-        und spaetere Toast-Benachrichtigungen laufen ins Leere. Muss vor dem
+        und spätere Toast-Benachrichtigungen laufen ins Leere. Muss vor dem
         ersten Fenster passieren.
         """
         from lernapp import APP_USER_MODEL_ID

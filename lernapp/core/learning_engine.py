@@ -1,7 +1,7 @@
-"""Lern-Engine: Kartenauswahl, Antwortpruefung, Runden.
+"""Lern-Engine: Kartenauswahl, Antwortprüfung, Runden.
 
-Enthaelt bewusst KEINE GUI-Aufrufe. Statt Widgets zu veraendern, liefert die
-Engine Zustaende und Ergebnisse zurueck; die Oberflaeche entscheidet, wie sie
+Enthält bewusst KEINE GUI-Aufrufe. Statt Widgets zu verändern, liefert die
+Engine Zustände und Ergebnisse zurück; die Oberfläche entscheidet, wie sie
 das darstellt.
 
 Der Zufall wird injiziert (`rng`), damit die Kartenauswahl reproduzierbar
@@ -61,7 +61,7 @@ class SessionZustand:
 
 
 class LearningSession:
-    """Eine Lernsitzung ueber die Karten eines Lernsets."""
+    """Eine Lernsitzung über die Karten eines Lernsets."""
 
     def __init__(
         self,
@@ -70,9 +70,9 @@ class LearningSession:
         rng: random.Random | None = None,
         richtung: str = GEMISCHT,
     ) -> None:
-        # Nach Schluessel deduplizieren. Der Fortschritt ist historisch nach der
-        # Frage-Zeichenkette indiziert; zwei Karten mit gleicher Frage waeren
-        # derselbe Eintrag und wuerden sonst doppelt gezaehlt.
+        # Nach Schlüssel deduplizieren. Der Fortschritt ist historisch nach der
+        # Frage-Zeichenkette indiziert; zwei Karten mit gleicher Frage wären
+        # derselbe Eintrag und würden sonst doppelt gezählt.
         self._nach_key: dict[str, NormalCard | TripleCard] = {}
         for k in karten:
             self._nach_key.setdefault(k.key, k)
@@ -111,10 +111,10 @@ class LearningSession:
         return SessionZustand.FERTIG
 
     def fortschritt_zaehler(self) -> tuple[int, int]:
-        """(gelernt, gesamt) in Lerneinheiten - ein Triple-Paket zaehlt als eins.
+        """(gelernt, gesamt) in Lerneinheiten - ein Triple-Paket zählt als eins.
 
         Diese Zahl ist die einzige Wahrheit. Sidebar, Fortschrittsbalken und
-        Statistik muessen alle sie verwenden.
+        Statistik müssen alle sie verwenden.
         """
         streaks = self.fortschritt.streaks
         gesamt = lerneinheiten(self.karten)
@@ -127,7 +127,7 @@ class LearningSession:
         return fertig, gesamt
 
     def _streak_gruppe(self, card) -> list[str]:
-        """Alle Streak-Schluessel, die bei einem Fehler gemeinsam fallen."""
+        """Alle Streak-Schlüssel, die bei einem Fehler gemeinsam fallen."""
         return self._paket_keys.get(card.key, [card.key])
 
     def _fehlerkarten(self) -> set[str]:
@@ -140,7 +140,7 @@ class LearningSession:
     # -- Ablauf ---------------------------------------------------------------
 
     def naechste_frage(self) -> Frage | None:
-        """Waehlt die naechste Karte. None heisst: Runde vorbei."""
+        """Wählt die nächste Karte. None heisst: Runde vorbei."""
         offen = self.offene_keys
         if not offen:
             self.aktuelle_frage = None
@@ -161,7 +161,7 @@ class LearningSession:
         return self.aktuelle_frage
 
     def antworte(self, eingabe) -> Ergebnis:
-        """Prueft die Antwort auf die aktuelle Frage und verbucht sie.
+        """Prüft die Antwort auf die aktuelle Frage und verbucht sie.
 
         `eingabe` ist ein String bei normalen Karten und eine Liste mit zwei
         Strings bei Triple-Karten.
@@ -185,7 +185,7 @@ class LearningSession:
             weitere = card.weitere_loesungen(text, frage.rueckwaerts) if ok else []
 
         if ok:
-            # Richtig zaehlt nur fuer diese eine Karte - beim Triple muessen
+            # Richtig zählt nur für diese eine Karte - beim Triple müssen
             # alle drei Formen einzeln sitzen.
             gewinn, level_up = self.fortschritt.richtig([card.key])
             return Ergebnis(
@@ -198,7 +198,7 @@ class LearningSession:
                 weitere=weitere,
             )
 
-        # Falsch setzt das ganze Paket zurueck.
+        # Falsch setzt das ganze Paket zurück.
         self.fortschritt.falsch(gruppe)
         return Ergebnis(richtig=False, combo=0, loesung=loesung)
 

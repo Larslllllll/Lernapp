@@ -2,9 +2,9 @@
 
 Auf der Platte liegt weiterhin das bestehende Format {"q": ..., "a": ...}.
 Intern arbeiten wir mit echten Objekten. Das Parsen ist verlustfrei:
-`card.legacy_item()` erzeugt exakt das Dict zurueck, aus dem die Karte kam.
+`card.legacy_item()` erzeugt exakt das Dict zurück, aus dem die Karte kam.
 
-Wichtig: `legacy_q` bleibt der Identitaetsschluessel fuer den Fortschritt,
+Wichtig: `legacy_q` bleibt der Identitätsschlüssel für den Fortschritt,
 weil progress.json historisch nach der Frage-Zeichenkette indiziert ist.
 """
 from __future__ import annotations
@@ -35,14 +35,14 @@ class NormalCard:
         return False
 
     def erwartet(self, rueckwaerts: bool = False) -> str:
-        """Der zu tippende Text. Rueckwaerts wird die Frage abgefragt."""
+        """Der zu tippende Text. Rückwärts wird die Frage abgefragt."""
         return self.question if rueckwaerts else self.answer
 
     def zeigt(self, rueckwaerts: bool = False) -> str:
         return self.answer if rueckwaerts else self.question
 
     def akzeptierte_antworten(self, rueckwaerts: bool = False) -> list[str]:
-        """Alle gueltigen Eingaben. "das Rad, das Fahrrad" ergibt zwei."""
+        """Alle gültigen Eingaben. "das Rad, das Fahrrad" ergibt zwei."""
         return _antwort_varianten(self.erwartet(rueckwaerts))
 
     def pruefe(self, eingabe: str, rueckwaerts: bool = False) -> bool:
@@ -78,7 +78,7 @@ class TripleCard:
 
     @property
     def package_key(self) -> tuple[str, str, str]:
-        """Identitaet des Pakets. Geordnetes Tupel - im Gegensatz zum frueheren
+        """Identität des Pakets. Geordnetes Tupel - im Gegensatz zum früheren
         frozenset kollabieren doppelte Formen (must/had to/had to) hier nicht."""
         return self.forms
 
@@ -98,7 +98,7 @@ class TripleCard:
 
     @property
     def key(self) -> str:
-        """Legacy-Fragezeichenkette - Schluessel fuer Streaks/Fortschritt."""
+        """Legacy-Fragezeichenkette - Schlüssel für Streaks/Fortschritt."""
         teile = [BLANK, BLANK, BLANK]
         teile[self.revealed] = self.forms[self.revealed]
         return " ".join(teile)
@@ -121,7 +121,7 @@ class TripleCard:
 
 
 def parse_card(item: dict) -> NormalCard | TripleCard:
-    """Legacy-Item -> Karte. Faellt auf NormalCard zurueck, wenn kein Triple."""
+    """Legacy-Item -> Karte. Fällt auf NormalCard zurück, wenn kein Triple."""
     q, a = item["q"], item["a"]
     triple = _parse_triple(q, a)
     return triple if triple is not None else NormalCard(question=q, answer=a)
@@ -136,7 +136,7 @@ def _parse_triple(q: str, a: str) -> TripleCard | None:
     if BLANK not in q:
         return None
     segmente = q.split(BLANK)
-    if len(segmente) != 3:          # genau zwei Luecken erwartet
+    if len(segmente) != 3:          # genau zwei Lücken erwartet
         return None
     gefuellt = [(i, s.strip()) for i, s in enumerate(segmente) if s.strip()]
     if len(gefuellt) != 1:          # genau eine sichtbare Form erwartet
@@ -159,7 +159,7 @@ def parse_items(items: list[dict]) -> list[NormalCard | TripleCard]:
 
 
 def gruppiere_pakete(karten: list) -> dict[tuple[str, str, str], list[TripleCard]]:
-    """Triple-Karten nach Paket buendeln."""
+    """Triple-Karten nach Paket bündeln."""
     pakete: dict[tuple[str, str, str], list[TripleCard]] = {}
     for k in karten:
         if k.is_triple:
@@ -168,11 +168,11 @@ def gruppiere_pakete(karten: list) -> dict[tuple[str, str, str], list[TripleCard
 
 
 def lerneinheiten(karten: list) -> int:
-    """Zaehlbare Lerneinheiten: ein Triple-Paket zaehlt als EINS.
+    """Zählbare Lerneinheiten: ein Triple-Paket zählt als EINS.
 
-    Genau diese Zahl muss ueberall gleich sein - Sidebar, Fortschrittsbalken
+    Genau diese Zahl muss überall gleich sein - Sidebar, Fortschrittsbalken
     und Statistik. Die alte Version hat hier je nach Ansicht unterschiedlich
-    gezaehlt.
+    gezählt.
     """
     normale = sum(1 for k in karten if not k.is_triple)
     return normale + len(gruppiere_pakete(karten))

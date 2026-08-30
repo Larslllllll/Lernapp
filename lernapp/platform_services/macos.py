@@ -1,7 +1,7 @@
 """macOS-spezifische Dienste.
 
 Noch nicht auf echter Hardware getestet - siehe Phase-2-Bericht.
-Der Ton laeuft ueber afplay, weil das ohne Zusatzpakete verfuegbar ist.
+Der Ton läuft über afplay, weil das ohne Zusatzpakete verfügbar ist.
 """
 from __future__ import annotations
 
@@ -25,11 +25,11 @@ class MacDienste(BasisDienste):
     name = "macos"
 
     def tastenkuerzel(self) -> dict[str, str]:
-        """Qt uebersetzt "Ctrl" auf macOS selbst zu Command.
+        """Qt übersetzt "Ctrl" auf macOS selbst zu Command.
 
         Die Standardzuordnung passt daher bereits. Sobald sich auf echter
-        Hardware zeigt, dass eine Kombination mit einem System-Kuerzel
-        kollidiert, wird sie hier - und nur hier - ueberschrieben.
+        Hardware zeigt, dass eine Kombination mit einem System-Kürzel
+        kollidiert, wird sie hier - und nur hier - überschrieben.
         """
         return super().tastenkuerzel()
 

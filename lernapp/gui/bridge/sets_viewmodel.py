@@ -1,6 +1,6 @@
-"""ViewModel fuer Ordner und Lernsets.
+"""ViewModel für Ordner und Lernsets.
 
-Zustaendig fuer Anlegen, Bearbeiten, Loeschen, Verschieben und die
+Zuständig für Anlegen, Bearbeiten, Löschen, Verschieben und die
 Fortschrittsanzeige je Lernset. Die Prozentzahl kommt aus derselben Quelle wie
 der Lernbildschirm (LearningSession.fortschritt_zaehler).
 """
@@ -107,7 +107,7 @@ class SetsViewModel(QObject):
 
     @Slot(str, result="QVariantMap")
     def lernsetLaden(self, ls_id: str) -> dict:
-        """Rohdaten fuer den Bearbeiten-Dialog."""
+        """Rohdaten für den Bearbeiten-Dialog."""
         ordner, ls = self._state.finde_lernset(ls_id)
         if ls is None:
             return {}
@@ -120,7 +120,7 @@ class SetsViewModel(QObject):
 
     @Slot(str, str, "QVariantList", result=str)
     def lernsetSpeichern(self, ls_id: str, name: str, items: list) -> str:
-        """Legt an oder aktualisiert. Gibt die ID zurueck, "" bei Fehler."""
+        """Legt an oder aktualisiert. Gibt die ID zurück, "" bei Fehler."""
         name = (name or "").strip()
         sauber = self._items_saeubern(items)
         if not name:
@@ -166,7 +166,7 @@ class SetsViewModel(QObject):
             return False
         liste = self._state.folders[ordner]["lernsets"]
         self._state.folders[ordner]["lernsets"] = [x for x in liste if x["id"] != ls_id]
-        # Fortschritt bewusst behalten: ein versehentliches Loeschen soll den
+        # Fortschritt bewusst behalten: ein versehentliches Löschen soll den
         # gesammelten XP-Stand nicht mitnehmen.
         if self._aktives == ls_id:
             self._aktives = ""
@@ -196,7 +196,7 @@ class SetsViewModel(QObject):
     def tripleKarten(self, f1: str, f2: str, f3: str) -> list:
         """Drei Karten eines Verbpakets.
 
-        Erzeugt ueber TripleCard aus dem Core, damit Anzeige und Speicherformat
+        Erzeugt über TripleCard aus dem Core, damit Anzeige und Speicherformat
         garantiert zusammenpassen - auch bei mehrwortigen Formen wie "had to".
         """
         formen = ((f1 or "").strip().lower(),
@@ -246,7 +246,7 @@ class SetsViewModel(QObject):
 
     @Slot(str, result="QVariantMap")
     def textVorschau(self, text: str) -> dict:
-        """Zeigt, was ein Textimport ergaebe - ohne etwas zu speichern."""
+        """Zeigt, was ein Textimport ergäbe - ohne etwas zu speichern."""
         ergebnis = parse_text(text)
         return {
             "ok": ergebnis.ok,
@@ -263,7 +263,7 @@ class SetsViewModel(QObject):
 
     @Slot(str, result="QVariantList")
     def textKarten(self, text: str) -> list:
-        """Die Karten eines Textimports - fuer den Lernset-Dialog."""
+        """Die Karten eines Textimports - für den Lernset-Dialog."""
         return parse_text(text).items
 
     # -- Hilfen ---------------------------------------------------------------

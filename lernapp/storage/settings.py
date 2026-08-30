@@ -1,7 +1,7 @@
 """Benutzereinstellungen (settings.json).
 
-Bewusst klein gehalten: nur was die Oberflaeche wirklich merken muss.
-Unbekannte Schluessel bleiben beim Speichern erhalten, damit eine aeltere
+Bewusst klein gehalten: nur was die Oberfläche wirklich merken muss.
+Unbekannte Schlüssel bleiben beim Speichern erhalten, damit eine ältere
 Programmversion nichts verliert.
 """
 from __future__ import annotations
@@ -34,7 +34,7 @@ def load_settings(pfad: Path | None = None) -> dict:
         roh = {}
     zusammen = {**STANDARD, **roh}
     zusammen["schema_version"] = SCHEMA_VERSION
-    # Verschachtelte Vorgabe ergaenzen, ohne Vorhandenes zu ueberschreiben.
+    # Verschachtelte Vorgabe ergänzen, ohne Vorhandenes zu überschreiben.
     fenster = {**STANDARD["fenster"], **(roh.get("fenster") or {})}
     zusammen["fenster"] = fenster
     return zusammen

@@ -31,7 +31,7 @@ ApplicationWindow {
 
     // -- Tastatur (global) ----------------------------------------------------
     // Die Kombinationen kommen aus lernapp.platform_services, damit macOS sie
-    // spaeter abweichen lassen kann, ohne dass die Oberflaeche sich aendert.
+    // später abweichen lassen kann, ohne dass die Oberfläche sich ändert.
     Shortcut {
         sequence: einstellungen.kuerzel.neuesLernset
         onActivated: dialog.oeffnenNeu(sets.ordnerNamen[0] || "")
@@ -106,7 +106,7 @@ ApplicationWindow {
         target: marktplatz
         function onFehler(text) { hinweis.zeige(text, true) }
         function onHinweis(text) { hinweis.zeige(text, false) }
-        // Ein uebernommenes Lernset soll sofort in der Seitenleiste stehen.
+        // Ein übernommenes Lernset soll sofort in der Seitenleiste stehen.
         function onUebernommen(lernsetId) { sets.aktualisiere() }
     }
 

@@ -1,8 +1,8 @@
 """ViewModel der Lernansicht.
 
-Uebersetzt zwischen QML und lernapp.core.learning_engine. Enthaelt bewusst
+Übersetzt zwischen QML und lernapp.core.learning_engine. Enthält bewusst
 keine Lernregeln: XP, Combo, Kartenauswahl, Runden und Triple-Logik bleiben
-vollstaendig im Core. Hier wird nur koordiniert und fuer die Anzeige
+vollständig im Core. Hier wird nur koordiniert und für die Anzeige
 aufbereitet.
 """
 from __future__ import annotations
@@ -48,7 +48,7 @@ class LearningViewModel(QObject):
         self._gesperrt = False
         self._statistik: dict = {}
 
-    # -- Lernset waehlen ------------------------------------------------------
+    # -- Lernset wählen ------------------------------------------------------
 
     @Slot(str)
     def waehleLernset(self, ls_id: str) -> None:
@@ -302,7 +302,7 @@ class LearningViewModel(QObject):
 
     @Slot()
     def fortschrittLoeschen(self) -> None:
-        """Setzt nur das aktuelle Lernset zurueck - wie in der Vorgaengerversion."""
+        """Setzt nur das aktuelle Lernset zurück - wie in der Vorgängerversion."""
         if self._session is None:
             return
         self._session.neustart()

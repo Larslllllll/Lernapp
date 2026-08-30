@@ -1,12 +1,12 @@
-"""Marktplatz: Lernsets direkt aus dem Netz uebernehmen.
+"""Marktplatz: Lernsets direkt aus dem Netz übernehmen.
 
-Das Laden laeuft in einem Arbeitsfaden aus dem globalen QThreadPool. Ein
-langsamer Server darf die Oberflaeche nicht einfrieren - und ein
+Das Laden läuft in einem Arbeitsfaden aus dem globalen QThreadPool. Ein
+langsamer Server darf die Oberfläche nicht einfrieren - und ein
 fehlgeschlagener Abruf darf das Lernen nicht blockieren: er meldet sich und
 sonst passiert nichts.
 
-Geschrieben wird ausschliesslich im Hauptfaden. Der Arbeitsfaden laedt und
-prueft, das Ergebnis kommt per Signal zurueck, und erst der Hauptfaden fasst
+Geschrieben wird ausschliesslich im Hauptfaden. Der Arbeitsfaden lädt und
+prüft, das Ergebnis kommt per Signal zurück, und erst der Hauptfaden fasst
 data.json an.
 """
 from __future__ import annotations
@@ -38,15 +38,15 @@ class _Auftrag(QRunnable):
         self._arbeit = arbeit
         self.signale = _Signale()
 
-    def run(self) -> None:  # laeuft im Arbeitsfaden
+    def run(self) -> None:  # läuft im Arbeitsfaden
         try:
             self.signale.fertig.emit(self._arbeit())
         except MarktplatzFehler as grund:
             self.signale.fehlgeschlagen.emit(str(grund))
         except Exception:
-            # Alles Unerwartete gehoert ins Protokoll, aber der Nutzer soll
+            # Alles Unerwartete gehört ins Protokoll, aber der Nutzer soll
             # keinen Traceback sehen - und die App darf nicht sterben, nur
-            # weil der Marktplatz sich seltsam verhaelt.
+            # weil der Marktplatz sich seltsam verhält.
             _log.exception("Unerwarteter Fehler im Marktplatz")
             self.signale.fehlgeschlagen.emit(
                 "Beim Laden ist etwas schiefgelaufen. Bitte später erneut versuchen."
@@ -62,9 +62,9 @@ class MarktplatzViewModel(QObject):
 
     def __init__(self, state: AppState, lader=marktplatz.lade_ueber_netz,
                  synchron: bool = False) -> None:
-        """`lader` und `synchron` sind fuer Tests gedacht.
+        """`lader` und `synchron` sind für Tests gedacht.
 
-        Mit `synchron=True` laeuft die Arbeit im aufrufenden Faden, damit ein
+        Mit `synchron=True` läuft die Arbeit im aufrufenden Faden, damit ein
         Test nicht auf einen Thread-Pool warten muss.
         """
         super().__init__()
@@ -107,7 +107,7 @@ class MarktplatzViewModel(QObject):
 
     @Slot()
     def aktualisieren(self) -> None:
-        """Katalog holen. Ein zweiter Aufruf waehrend des Ladens tut nichts."""
+        """Katalog holen. Ein zweiter Aufruf während des Ladens tut nichts."""
         if self._laedt:
             return
         self._setze_laedt(True)
@@ -118,7 +118,7 @@ class MarktplatzViewModel(QObject):
 
     @Slot()
     def einmalLaden(self) -> None:
-        """Beim ersten Oeffnen laden, danach den Katalog behalten."""
+        """Beim ersten Öffnen laden, danach den Katalog behalten."""
         if not self._geladen_einmal:
             self.aktualisieren()
 

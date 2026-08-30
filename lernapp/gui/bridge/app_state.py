@@ -1,9 +1,9 @@
-"""Gemeinsamer Zustand der Oberflaeche.
+"""Gemeinsamer Zustand der Oberfläche.
 
-Haelt die geladenen Lernsets, den Fortschritt und die Einstellungen an einer
-Stelle, damit die ViewModels sich nicht gegenseitig Daten durchreichen muessen.
+Hält die geladenen Lernsets, den Fortschritt und die Einstellungen an einer
+Stelle, damit die ViewModels sich nicht gegenseitig Daten durchreichen müssen.
 
-Enthaelt keine Lernregeln - die liegen ausschliesslich in lernapp.core.
+Enthält keine Lernregeln - die liegen ausschliesslich in lernapp.core.
 """
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ from lernapp.storage.settings import load_settings, save_settings, settings_file
 
 
 class AppState:
-    """`basis` ueberschreibt das Datenverzeichnis - nur fuer Tests gedacht."""
+    """`basis` überschreibt das Datenverzeichnis - nur für Tests gedacht."""
 
     def __init__(self, basis: Path | None = None) -> None:
         self._basis = basis
@@ -58,7 +58,7 @@ class AppState:
         return self.data.setdefault("folders", {})
 
     def alle_lernsets(self):
-        """(ordnername, lernset) fuer jedes Lernset."""
+        """(ordnername, lernset) für jedes Lernset."""
         for ordner, fdata in self.folders.items():
             for ls in fdata.get("lernsets", []):
                 yield ordner, ls

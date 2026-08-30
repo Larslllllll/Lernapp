@@ -1,6 +1,6 @@
-"""Start der PySide6/QML-Oberflaeche.
+"""Start der PySide6/QML-Oberfläche.
 
-Verdrahtet die ViewModels miteinander und laedt Main.qml. Enthaelt selbst
+Verdrahtet die ViewModels miteinander und lädt Main.qml. Enthält selbst
 keine Lernlogik.
 """
 from __future__ import annotations
@@ -50,9 +50,9 @@ def _verdrahten(sets: SetsViewModel, lernen: LearningViewModel,
 
 
 def _entwicklungsposition(engine: QQmlApplicationEngine) -> None:
-    """Nur fuer die Entwicklung: Fenster per LERNAPP_FENSTER="x,y" platzieren.
+    """Nur für die Entwicklung: Fenster per LERNAPP_FENSTER="x,y" platzieren.
 
-    Ohne die Variable verhaelt sich das Fenster normal.
+    Ohne die Variable verhält sich das Fenster normal.
     """
     import os
 
@@ -69,9 +69,9 @@ def _entwicklungsposition(engine: QQmlApplicationEngine) -> None:
 
 
 def run() -> int:
-    # Zuerst das Protokoll: alles, was danach schiefgeht, hinterlaesst eine
+    # Zuerst das Protokoll: alles, was danach schiefgeht, hinterlässt eine
     # Spur. Im gebauten Bundle gibt es keine Konsole, auf der ein Traceback
-    # sonst landen koennte.
+    # sonst landen könnte.
     log_pfad = protokoll.richte_logging_ein()
     installiere_excepthook(log_pfad)
     protokoll.notiere_start(__version__)
@@ -108,12 +108,12 @@ def run() -> int:
         return 1
 
     # Ab jetzt gibt es ein Elternfenster - erst damit wird ein Fehlerdialog
-    # ueberhaupt sichtbar (siehe absturz.py).
+    # überhaupt sichtbar (siehe absturz.py).
     setze_hauptfenster(engine.rootObjects()[0])
 
     _entwicklungsposition(engine)
 
-    # Zuletzt aktives Lernset wieder oeffnen, sonst das erste.
+    # Zuletzt aktives Lernset wieder öffnen, sonst das erste.
     zuletzt = state.settings.get("letztes_lernset", "")
     kandidat = zuletzt if state.finde_lernset(zuletzt)[1] else ""
     if not kandidat:

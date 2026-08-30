@@ -1,7 +1,7 @@
 """Import und Export von Lernsets.
 
 GUI-frei und ohne Datei-I/O: hier wird nur zwischen Text/Dict und Karten
-uebersetzt. Wer Dateien schreibt, ist lernapp.storage.
+übersetzt. Wer Dateien schreibt, ist lernapp.storage.
 
 Importformate (Trennzeichen wird automatisch erkannt):
 
@@ -50,7 +50,7 @@ class ImportErgebnis:
 
     @property
     def einheiten(self) -> int:
-        """Zaehlbare Lerneinheiten - ein Paket zaehlt als eins."""
+        """Zählbare Lerneinheiten - ein Paket zählt als eins."""
         return self.normale + self.pakete
 
     def zusammenfassung(self) -> str:
@@ -68,10 +68,10 @@ class ImportErgebnis:
 
 
 def erkenne_trenner(text: str) -> str:
-    """Bestimmt das Trennzeichen fuer den gesamten Text.
+    """Bestimmt das Trennzeichen für den gesamten Text.
 
     Tabulator und Semikolon gewinnen immer gegen das Komma, weil Antworten
-    selbst Kommas enthalten koennen.
+    selbst Kommas enthalten können.
     """
     zeilen = [z for z in text.splitlines() if z.strip()]
     if not zeilen:
@@ -83,7 +83,7 @@ def erkenne_trenner(text: str) -> str:
 
 
 def parse_text(text: str, trenner: str | None = None) -> ImportErgebnis:
-    """Zerlegt eingefuegten Text in Karten. Schreibt nichts."""
+    """Zerlegt eingefügten Text in Karten. Schreibt nichts."""
     ergebnis = ImportErgebnis(trenner=trenner or erkenne_trenner(text))
 
     for nummer, roh in enumerate(text.splitlines(), start=1):

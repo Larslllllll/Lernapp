@@ -1,4 +1,4 @@
-"""Tests fuer SetProgress - Fehlerzaehler, Combo und Legacy-Kompatibilitaet."""
+"""Tests für SetProgress - Fehlerzähler, Combo und Legacy-Kompatibilität."""
 from lernapp.core.progress import SCHEMA_VERSION, SetProgress
 
 
@@ -102,7 +102,7 @@ def test_fehler_wird_nur_der_hauptkarte_zugeschrieben():
     assert p.total_errors == {"k1": 1}
 
 
-# -- Legacy-Kompatibilitaet ---------------------------------------------------
+# -- Legacy-Kompatibilität ---------------------------------------------------
 
 def test_liest_altes_format():
     alt = {
@@ -118,7 +118,7 @@ def test_liest_altes_format():
 
 
 def test_gespeicherte_combo_startet_nicht_wieder_als_multiplikator():
-    """Frueher wurde combo=12 geladen und man startete sofort mit x3."""
+    """Früher wurde combo=12 geladen und man startete sofort mit x3."""
     p = SetProgress.from_legacy({"combo": 12})
     assert p.current_combo == 0
     assert p.best_combo == 12, "Wert geht nicht verloren, wird aber zum Rekord"

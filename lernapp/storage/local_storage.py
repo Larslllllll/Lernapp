@@ -1,15 +1,15 @@
 """Laden und Speichern der lokalen JSON-Dateien.
 
-Zwei Eigenschaften, die die Vorgaengerversion nicht hatte:
+Zwei Eigenschaften, die die Vorgängerversion nicht hatte:
 
   Atomares Schreiben
       Bisher wurde direkt in data.json geschrieben. Ein Absturz mitten im
-      json.dump hinterlaesst eine halbe Datei - bei 164 KB Lernsets ein realer
+      json.dump hinterlässt eine halbe Datei - bei 164 KB Lernsets ein realer
       Datenverlust. Jetzt wird in eine Temp-Datei geschrieben und erst danach
-      per os.replace umgehaengt.
+      per os.replace umgehängt.
 
   Backup vor dem ersten Schreiben je Sitzung
-      Damit ein fehlerhaftes Update nicht die einzige Kopie zerstoert.
+      Damit ein fehlerhaftes Update nicht die einzige Kopie zerstört.
 """
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ def _lade_json(pfad: Path, standard: Any) -> Any:
         with pfad.open("r", encoding="utf-8") as f:
             return json.load(f)
     except (json.JSONDecodeError, OSError):
-        # Beschaedigte Datei nicht ueberschreiben - beiseitelegen und melden.
+        # Beschädigte Datei nicht überschreiben - beiseitelegen und melden.
         beschaedigt = pfad.with_suffix(f".beschaedigt-{datetime.now():%Y%m%d-%H%M%S}.json")
         try:
             shutil.copy2(pfad, beschaedigt)

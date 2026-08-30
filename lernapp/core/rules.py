@@ -18,7 +18,7 @@ XP_PRO_WIEDERHOLUNG = 5
 
 
 def get_level(xp: int) -> int:
-    """Level fuer einen XP-Stand. Beginnt bei 1, gedeckelt auf MAX_LEVEL."""
+    """Level für einen XP-Stand. Beginnt bei 1, gedeckelt auf MAX_LEVEL."""
     level = 1
     for i, schwelle in enumerate(LEVEL_XP):
         if xp >= schwelle:
@@ -27,7 +27,7 @@ def get_level(xp: int) -> int:
 
 
 def combo_mul(combo: int) -> float:
-    """XP-Multiplikator fuer eine laufende Combo."""
+    """XP-Multiplikator für eine laufende Combo."""
     for ab, mul in _COMBO_STUFEN:
         if combo >= ab:
             return mul
@@ -35,7 +35,7 @@ def combo_mul(combo: int) -> float:
 
 
 def xp_gain(streak: int, combo: int) -> int:
-    """XP fuer eine richtige Antwort.
+    """XP für eine richtige Antwort.
 
     `streak`  - Streak der Karte NACH dieser Antwort (>= 1)
     `combo`   - Combo NACH dieser Antwort (>= 1)

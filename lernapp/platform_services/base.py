@@ -1,7 +1,7 @@
 """Gemeinsame Schnittstelle der plattformspezifischen Dienste.
 
 Regel: ausserhalb dieses Pakets darf kein Modul `winsound`, `AppKit` oder
-aehnliches importieren. Fehler in einem Dienst duerfen das Lernen niemals
+ähnliches importieren. Fehler in einem Dienst dürfen das Lernen niemals
 verhindern - alle Implementierungen schlucken ihre eigenen Ausnahmen.
 """
 from __future__ import annotations
@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Protocol
 
 
-# Fachliche Aktionsnamen. Die Oberflaeche kennt nur diese Namen, nie eine
+# Fachliche Aktionsnamen. Die Oberfläche kennt nur diese Namen, nie eine
 # konkrete Tastenkombination.
 AKTIONEN = (
     "neuesLernset",
@@ -38,7 +38,7 @@ class PlattformDienste(Protocol):
 
 
 class BasisDienste:
-    """Neutrale Grundimplementierung - tut nichts, schlaegt nie fehl."""
+    """Neutrale Grundimplementierung - tut nichts, schlägt nie fehl."""
 
     name = "generisch"
 
@@ -71,8 +71,8 @@ class BasisDienste:
 
         Qt bildet "Ctrl" in einer Tastenfolge auf macOS bereits selbst auf die
         Command-Taste ab. Diese Methode existiert trotzdem, damit echte
-        Abweichungen (andere Taste, zusaetzliches Kuerzel) an genau einer
-        Stelle liegen und die Oberflaeche nie eine Kombination fest verdrahtet.
+        Abweichungen (andere Taste, zusätzliches Kürzel) an genau einer
+        Stelle liegen und die Oberfläche nie eine Kombination fest verdrahtet.
         """
         return {
             "neuesLernset": "Ctrl+N",

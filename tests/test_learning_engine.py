@@ -1,6 +1,6 @@
-"""Tests fuer die LearningSession.
+"""Tests für die LearningSession.
 
-Der Zufall wird ueber ein injiziertes random.Random(seed) kontrolliert, damit
+Der Zufall wird über ein injiziertes random.Random(seed) kontrolliert, damit
 die Kartenauswahl reproduzierbar ist.
 """
 import random
@@ -35,7 +35,7 @@ def session(items, seed=1, **kw):
 
 
 def viele_vokabeln(n):
-    """n verschiedene Karten - Duplikate wuerden deduspliziert."""
+    """n verschiedene Karten - Duplikate würden deduspliziert."""
     return [{"q": f"frage{i}", "a": f"antwort{i}"} for i in range(n)]
 
 
@@ -173,7 +173,7 @@ def test_regression_had_to_karte_ist_loesbar():
 
 
 def test_regression_kaputtes_paket_erreicht_100_prozent():
-    """must/had to/had to war frueher in zwei Pakete zerfallen und blockierte
+    """must/had to/had to war früher in zwei Pakete zerfallen und blockierte
     den Abschluss der Runde."""
     kaputt = [
         {"q": "must ___ ___", "a": "had to, had to"},
@@ -188,7 +188,7 @@ def test_regression_kaputtes_paket_erreicht_100_prozent():
     assert s.fortschritt_zaehler() == (1, 1)
 
 
-# -- Zaehlung -----------------------------------------------------------------
+# -- Zählung -----------------------------------------------------------------
 
 def test_fortschritt_zaehlt_paket_als_eine_einheit():
     s = session(TRIPLE + VOKABELN, richtung=VORWAERTS)
@@ -250,7 +250,7 @@ def test_neustart_setzt_alles_zurueck():
     assert s.fortschritt_zaehler()[0] == 0
 
 
-# -- Fortschritt uebernehmen --------------------------------------------------
+# -- Fortschritt übernehmen --------------------------------------------------
 
 def test_bestehender_fortschritt_wird_uebernommen():
     p = SetProgress(xp=100, streaks={"la maison": 1})

@@ -1,8 +1,8 @@
 """Charakterisierungstests: neuer Core gegen das eingefrorene Altverhalten.
 
-Die Referenzfunktionen unten sind woertliche Kopien aus LernApp.py vor dem
-Refactor. Sie bleiben absichtlich hier stehen, damit jede kuenftige Aenderung
-an den Spielregeln sofort auffaellt.
+Die Referenzfunktionen unten sind wörtliche Kopien aus LernApp.py vor dem
+Refactor. Sie bleiben absichtlich hier stehen, damit jede künftige Änderung
+an den Spielregeln sofort auffällt.
 """
 import pytest
 
@@ -49,7 +49,7 @@ def legacy_pkg_key(q, a):
 
 
 # ---------------------------------------------------------------------------
-# Aequivalenz
+# Äquivalenz
 # ---------------------------------------------------------------------------
 
 def test_level_xp_tabelle_unveraendert():
@@ -104,13 +104,13 @@ def test_xp_fixpunkte(streak, combo, erwartet):
 
 
 # ---------------------------------------------------------------------------
-# Bewusste Verhaltensaenderung - dokumentiert, nicht versehentlich
+# Bewusste Verhaltensänderung - dokumentiert, nicht versehentlich
 # ---------------------------------------------------------------------------
 
 def test_neue_paketbildung_repariert_altbug():
     """Bei mehrwortigen Formen wich die alte Paketbildung ab.
 
-    'been able' wurde von q.split() zu 'been' verkuerzt, wodurch die dritte
+    'been able' wurde von q.split() zu 'been' verkürzt, wodurch die dritte
     Karte in einem eigenen Paket landete.
     """
     alt = legacy_pkg_key("___ ___ been able", "can, could")

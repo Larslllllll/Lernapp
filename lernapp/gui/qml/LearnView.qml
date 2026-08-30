@@ -9,7 +9,7 @@ import "components"
 Item {
     id: view
 
-    // Weich hochzaehlende XP-Zahl: eine echte Property mit Behavior.
+    // Weich hochzählende XP-Zahl: eine echte Property mit Behavior.
     property real xpAnzeige: lernen.xp
     Behavior on xpAnzeige {
         NumberAnimation { duration: Theme.dauerLangsam; easing.type: Easing.OutCubic }
@@ -275,7 +275,7 @@ Item {
                                 property alias eingabeText: slotFeld.text
                                 function fokussieren() { if (istEingabe) slotFeld.forceActiveFocus() }
 
-                                // Mitschrumpfen, sonst laeuft die dritte Spalte
+                                // Mitschrumpfen, sonst läuft die dritte Spalte
                                 // in schmalen Fenstern aus der Karte heraus.
                                 Layout.fillWidth: true
                                 Layout.minimumWidth: 84

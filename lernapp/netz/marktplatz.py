@@ -1,15 +1,15 @@
 """Der Marktplatz: fertige Lernsets aus dem Netz holen.
 
-Kennt weder Qt noch die Oberflaeche und schreibt keine Datei. Wer laedt, wird
+Kennt weder Qt noch die Oberfläche und schreibt keine Datei. Wer lädt, wird
 hereingereicht (`lader`) - deshalb laufen die Tests ohne Internet.
 
-Der Katalog liegt als index.json in einem oeffentlichen Repo. Jeder Eintrag
-fuehrt eine SHA-256-Summe; heruntergeladen wird gegen diese Summe geprueft,
+Der Katalog liegt als index.json in einem öffentlichen Repo. Jeder Eintrag
+führt eine SHA-256-Summe; heruntergeladen wird gegen diese Summe geprüft,
 bevor irgendetwas in die Lernsets des Nutzers wandert. Dieselbe Regel wie beim
-Installer: nichts uebernehmen, was nicht dem entspricht, was angekuendigt war.
+Installer: nichts übernehmen, was nicht dem entspricht, was angekündigt war.
 
 Bewusst NICHT hier: die Zahl der Lerneinheiten. Ein Verbpaket liegt als drei
-Karten in der Datei und zaehlt als eine Einheit - diese Regel steht in
+Karten in der Datei und zählt als eine Einheit - diese Regel steht in
 lernapp.core und darf keine zweite Fassung bekommen.
 """
 from __future__ import annotations
@@ -58,7 +58,7 @@ class Katalog:
     eintraege: tuple[Eintrag, ...]
 
     def faecher(self) -> tuple[str, ...]:
-        """Faecher in der Reihenfolge ihres ersten Auftretens im Katalog."""
+        """Fächer in der Reihenfolge ihres ersten Auftretens im Katalog."""
         gesehen: list[str] = []
         for eintrag in self.eintraege:
             if eintrag.fach not in gesehen:
@@ -67,14 +67,14 @@ class Katalog:
 
 
 def lade_ueber_netz(url: str) -> bytes:
-    """Standardlader. Nur HTTPS, mit Zeitlimit und Groessengrenze."""
+    """Standardlader. Nur HTTPS, mit Zeitlimit und Größengrenze."""
     if not url.startswith("https://"):
         raise MarktplatzFehler("Nur HTTPS-Adressen werden geladen.")
     anfrage = urllib.request.Request(url, headers={"User-Agent": "LernApp"})
     try:
         with urllib.request.urlopen(anfrage, timeout=ZEITLIMIT) as antwort:
             # Ein Byte mehr lesen als erlaubt, damit ein zu grosser Inhalt
-            # auffaellt, statt still abgeschnitten zu werden.
+            # auffällt, statt still abgeschnitten zu werden.
             daten = antwort.read(MAX_BYTES + 1)
     except urllib.error.HTTPError as grund:
         raise MarktplatzFehler(
@@ -103,8 +103,8 @@ def _url_bauen(basis: str, datei: str) -> str:
     """basis_url und den Pfad aus dem Katalog zusammensetzen.
 
     `datei` kommt aus einer Datei im Netz. Ein Pfad, der aus dem Repo
-    herausfuehrt oder auf einen anderen Server zeigt, wird abgelehnt - sonst
-    liesse sich ueber einen manipulierten Katalog eine beliebige Adresse
+    herausführt oder auf einen anderen Server zeigt, wird abgelehnt - sonst
+    liesse sich über einen manipulierten Katalog eine beliebige Adresse
     unterschieben.
     """
     if not basis.startswith("https://"):
@@ -121,7 +121,7 @@ def lade_katalog(lader: Lader = lade_ueber_netz,
 
     version = roh.get("schema_version")
     if version != SCHEMA:
-        # Groesser heisst: der Marktplatz ist weiter als diese App. Kleiner
+        # Größer heisst: der Marktplatz ist weiter als diese App. Kleiner
         # sollte nie vorkommen; beides ist derselbe Rat an den Nutzer.
         raise MarktplatzFehler(
             "Der Marktplatz braucht eine neuere Version von LernApp."
@@ -138,7 +138,7 @@ def lade_katalog(lader: Lader = lade_ueber_netz,
         datei = str(satz.get("datei", ""))
         summe = str(satz.get("sha256", ""))
         if not name or not datei or len(summe) != 64:
-            # Einen unvollstaendigen Eintrag ueberspringen statt den ganzen
+            # Einen unvollständigen Eintrag überspringen statt den ganzen
             # Katalog zu verwerfen: ein kaputtes Lernset soll nicht die
             # anderen 23 unerreichbar machen.
             continue
@@ -159,10 +159,10 @@ def lade_katalog(lader: Lader = lade_ueber_netz,
 
 def lade_lernset(eintrag: Eintrag,
                  lader: Lader = lade_ueber_netz) -> tuple[str, list[dict]]:
-    """(Name, Karten) eines Lernsets - erst nach bestandener Pruefsumme.
+    """(Name, Karten) eines Lernsets - erst nach bestandener Prüfsumme.
 
     Der Name kommt aus der geladenen Datei, nicht aus dem Katalog: massgeblich
-    ist, was tatsaechlich im Lernset steht.
+    ist, was tatsächlich im Lernset steht.
     """
     daten = lader(eintrag.url)
     tatsaechlich = hashlib.sha256(daten).hexdigest()

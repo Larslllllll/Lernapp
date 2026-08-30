@@ -1,5 +1,5 @@
 // Combo-Anzeige mit dezentem Puls. Die Schwellen kommen aus dem Core,
-// hier wird nur eingefaerbt.
+// hier wird nur eingefärbt.
 import QtQuick
 import theme
 

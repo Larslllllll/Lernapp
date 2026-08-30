@@ -1,8 +1,8 @@
 """Packaging und Release-Weg passen zueinander.
 
-Diese Tests laufen ohne Netz. Sie pruefen nicht, ob eine Installation
+Diese Tests laufen ohne Netz. Sie prüfen nicht, ob eine Installation
 funktioniert - das geht nur auf einer echten Windows-Maschine -, sondern ob
-die Stellen zusammenpassen, die auseinanderlaufen koennen: die
+die Stellen zusammenpassen, die auseinanderlaufen können: die
 PyInstaller-Spec, das Inno-Skript, install.ps1 und release.py.
 """
 from __future__ import annotations
@@ -37,7 +37,7 @@ def test_bundle_ist_onedir_nicht_onefile():
     Start, und Virenscanner mustern jedes Mal frisch. Der Unterschied steht
     nicht als Flag in der Spec, sondern in zwei Details: EXE bekommt die
     Binaries NICHT mit (exclude_binaries=True), und ein COLLECT sammelt sie
-    danach in einen Ordner. Faellt eines davon weg, ist es --onefile.
+    danach in einen Ordner. Fällt eines davon weg, ist es --onefile.
     """
     assert "exclude_binaries=True" in SPEC_TEXT
     assert "coll = COLLECT(" in SPEC_TEXT
@@ -61,11 +61,11 @@ def test_installer_verteilt_das_bundle_als_ordner():
 
 
 def test_icon_hat_alle_groessen_die_windows_abfragt():
-    """Eine .ico mit nur einer Groesse laesst Windows selbst herunterrechnen.
+    """Eine .ico mit nur einer Größe lässt Windows selbst herunterrechnen.
 
     Das sieht in der Taskleiste und besonders bei 16 px sichtbar matschig aus.
     Die Datei wird hier von Hand gelesen statt mit Pillow: das Format ist ein
-    6-Byte-Kopf, danach 16 Byte je Eintrag, und die Groesse steht in den ersten
+    6-Byte-Kopf, danach 16 Byte je Eintrag, und die Größe steht in den ersten
     beiden Bytes (0 bedeutet 256).
     """
     roh = (WURZEL / "ico.ico").read_bytes()
@@ -103,7 +103,7 @@ def test_appid_stimmt_mit_inno_skript_ueberein():
 def _release_modul():
     """release.py per Pfad laden.
 
-    Nicht ueber `import packaging.release`: der Ordnername kollidiert mit der
+    Nicht über `import packaging.release`: der Ordnername kollidiert mit der
     gleichnamigen Bibliothek aus dem venv, und ein __init__.py wollen wir
     dort nicht.
     """
@@ -137,7 +137,7 @@ def test_manifest_url_zeigt_auf_das_release_der_eigenen_version(tmp_path):
 
 
 def test_setupname_folgt_dem_inno_muster():
-    """release.py sucht die Datei, die Inno tatsaechlich erzeugt."""
+    """release.py sucht die Datei, die Inno tatsächlich erzeugt."""
     muster = re.search(r"OutputBaseFilename=(\S+)", ISS_TEXT).group(1)
     assert muster == "LernApp-Setup-{#AppVersion}"
     quelltext = RELEASE.read_text(encoding="utf-8")
@@ -155,7 +155,7 @@ def test_installskript_prueft_die_pruefsumme_vor_dem_ausfuehren():
 def test_installskript_liegt_an_der_stelle_die_es_selbst_nennt():
     """Die kurze URL zeigt auf die Wurzel - dort muss die Datei auch liegen.
 
-    Sonst laedt der Einzeiler eine Datei, die es nicht gibt, oder eine
+    Sonst lädt der Einzeiler eine Datei, die es nicht gibt, oder eine
     veraltete Kopie.
     """
     treffer = re.search(r"raw\.githubusercontent\.com/([^/]+)/([^/]+)/([^/]+)/(\S+?)\)", PS1)
@@ -168,7 +168,7 @@ def test_installskript_liegt_an_der_stelle_die_es_selbst_nennt():
 
 
 def test_manifest_liegt_im_repo_nicht_im_build():
-    """latest.json gehoert unter Versionskontrolle, nicht nach dist/."""
+    """latest.json gehört unter Versionskontrolle, nicht nach dist/."""
     release = _release_modul()
     assert release.MANIFEST.parent == release.WURZEL
     assert release.MANIFEST.name == "latest.json"
@@ -181,7 +181,7 @@ def test_installskript_verlangt_https():
 @pytest.mark.skipif(shutil.which("powershell") is None,
                     reason="PowerShell nicht verfuegbar")
 def test_installskript_ist_syntaktisch_gueltig():
-    """Ein Tippfehler faellt sonst erst beim Klassenkameraden auf."""
+    """Ein Tippfehler fällt sonst erst beim Klassenkameraden auf."""
     befehl = (
         "$f=$null; $e=$null; "
         f"[System.Management.Automation.Language.Parser]::ParseFile("

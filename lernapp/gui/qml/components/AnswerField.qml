@@ -1,4 +1,4 @@
-// Eingabefeld fuer Antworten. Enter loest Pruefen aus.
+// Eingabefeld für Antworten. Enter löst Prüfen aus.
 import QtQuick
 import QtQuick.Controls.Basic
 import theme

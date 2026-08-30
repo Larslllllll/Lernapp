@@ -1,8 +1,8 @@
 """Der Marktplatz-Kern - ohne Netz, ohne Qt.
 
-Geprueft wird vor allem, was passiert, wenn der Katalog nicht das enthaelt,
-was er soll. Die Datei kommt aus dem Netz; nichts darin ist vertrauenswuerdig,
-bevor es geprueft wurde.
+Geprüft wird vor allem, was passiert, wenn der Katalog nicht das enthält,
+was er soll. Die Datei kommt aus dem Netz; nichts darin ist vertrauenswürdig,
+bevor es geprüft wurde.
 """
 from __future__ import annotations
 
@@ -89,7 +89,7 @@ def test_neueres_schema_verlangt_eine_neuere_app():
 
 
 def test_kaputter_eintrag_macht_die_anderen_nicht_unerreichbar():
-    """Ein fehlerhafter Satz wird uebersprungen, nicht der ganze Katalog."""
+    """Ein fehlerhafter Satz wird übersprungen, nicht der ganze Katalog."""
     eintraege = [
         {"name": "Ohne Datei", "ordner": "X", "sha256": "a" * 64},
         _eintrag(name="Heil"),
@@ -111,7 +111,7 @@ def test_beschaedigtes_json_wird_nicht_als_absturz_weitergereicht():
         m.lade_katalog(lader)
 
 
-# -- Adressen: alles aus dem Netz ist erst einmal verdaechtig -----------------
+# -- Adressen: alles aus dem Netz ist erst einmal verdächtig -----------------
 
 @pytest.mark.parametrize("datei", [
     "../../../etc/passwd",
@@ -120,7 +120,7 @@ def test_beschaedigtes_json_wird_nicht_als_absturz_weitergereicht():
     "",
 ])
 def test_unzulaessige_pfade_werden_abgelehnt(datei):
-    """Ueber einen manipulierten Katalog darf keine fremde Adresse kommen."""
+    """Über einen manipulierten Katalog darf keine fremde Adresse kommen."""
     lader = _lader({m.STANDARD_KATALOG: _katalog_bytes([_eintrag(datei=datei)])})
     with pytest.raises(m.MarktplatzFehler):
         m.lade_katalog(lader)
@@ -155,7 +155,7 @@ def test_lernset_wird_geladen_und_geprueft():
 
 
 def test_falsche_pruefsumme_verwirft_das_lernset():
-    """Der wichtigste Test hier: uebernommen wird nur, was angekuendigt war."""
+    """Der wichtigste Test hier: übernommen wird nur, was angekündigt war."""
     satz = _eintrag()
     lader = _lader({
         m.STANDARD_KATALOG: _katalog_bytes([satz]),

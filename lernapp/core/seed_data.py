@@ -1,7 +1,7 @@
-"""Startdaten fuer eine frische Installation.
+"""Startdaten für eine frische Installation.
 
-Inhaltlich identisch mit dem frueheren LernApp._default_data(). Diese Datei
-wurde aus dem Original generiert, damit das Erststart-Verhalten unveraendert
+Inhaltlich identisch mit dem früheren LernApp._default_data(). Diese Datei
+wurde aus dem Original generiert, damit das Erststart-Verhalten unverändert
 bleibt.
 """
 from __future__ import annotations
@@ -56,7 +56,7 @@ def standard_items() -> list[dict]:
 
 
 def standard_data() -> dict:
-    """Grundgeruest fuer eine frische Installation."""
+    """Grundgerüst für eine frische Installation."""
     return {
         "folders": {
             "Verben": {

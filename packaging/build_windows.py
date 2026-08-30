@@ -13,6 +13,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -23,10 +24,18 @@ from lernapp import __version__  # noqa: E402
 SPEC = WURZEL / "packaging" / "lernapp.spec"
 ISS = WURZEL / "packaging" / "lernapp.iss"
 DIST = WURZEL / "dist"
-# Eigenes Arbeitsverzeichnis: build/ enthaelt noch Altlasten frueherer
-# Versionen, die uns nicht gehoeren und die wir nicht anfassen.
-WORK = WURZEL / "build" / "pyinstaller"
+# Der Arbeitsordner von PyInstaller liegt bewusst AUSSERHALB des Projekts.
+# Das Projekt liegt in OneDrive, und der Sync-Dienst greift sich jede der
+# tausenden Zwischendateien sofort - das bremst den Build und laesst ihn beim
+# naechsten Lauf am Aufraeumen scheitern. Der Ordner ist reiner Zwischenstand
+# und gehoert nirgends hin, wo er gesichert wird.
+WORK = Path(tempfile.gettempdir()) / "lernapp-pyinstaller"
 ZIEL = DIST / "LernApp"
+
+# So oft wird ein gesperrter Ordner erneut angefasst, bevor aufgegeben wird.
+# Das Projekt liegt in OneDrive, und der Sync haelt nach einem Build gern
+# noch Sekunden lang einen Handle auf die 2000 frisch geschriebenen Dateien.
+VERSUCHE = 6
 
 # Diese Qt-Bibliotheken laedt die App zur Laufzeit. Fehlt eine davon im
 # Bundle, ist der Build kaputt - unabhaengig davon, ob er durchlaeuft.
@@ -78,7 +87,7 @@ def _aufraeumen(ordner: Path) -> None:
     if not ordner.exists():
         return
     for eintrag in list(ordner.iterdir()):
-        for versuch in range(3):
+        for versuch in range(VERSUCHE):
             try:
                 if eintrag.is_dir():
                     shutil.rmtree(eintrag)
@@ -86,9 +95,16 @@ def _aufraeumen(ordner: Path) -> None:
                     eintrag.unlink()
                 break
             except PermissionError:
-                if versuch == 2:
-                    fehler(f"{eintrag} laesst sich nicht loeschen - laeuft die App noch?")
-                time.sleep(1.0)
+                if versuch == VERSUCHE - 1:
+                    fehler(
+                        f"{eintrag} laesst sich nicht loeschen.\n"
+                        "       Laeuft die App noch? Sonst haelt der OneDrive-Sync\n"
+                        "       den Ordner fest - kurz warten und erneut starten."
+                    )
+                # Wachsende Wartezeit: der Sync gibt den Ordner nach ein paar
+                # Sekunden von selbst frei, ein starres Intervall trifft das
+                # Fenster oft nicht.
+                time.sleep(1.0 + versuch)
 
 
 def bauen() -> float:

@@ -64,6 +64,10 @@ bricht ab, wenn doch `PySide6-Addons` installiert ist.
 Für den Installer wird zusätzlich [Inno Setup](https://jrsoftware.org/isinfo.php)
 gebraucht (`winget install JRSoftware.InnoSetup`).
 
+Das App-Icon wird aus `packaging/icon-quelle.png` erzeugt, nicht von Hand
+gepflegt — `packaging/icon_bauen.py` schneidet den Rand ab und legt alle
+Größen ab, die Windows abfragt (16 bis 256 px).
+
 ## Aufbau
 
 ```

@@ -2,3 +2,5 @@
 pytest>=8
 pytest-cov
 pyinstaller
+# nur fuer packaging/icon_bauen.py, nicht fuer die App
+pillow

@@ -60,6 +60,24 @@ def test_installer_verteilt_das_bundle_als_ordner():
     assert r'QuellVerzeichnis "..\dist\LernApp"' in ISS_TEXT
 
 
+def test_icon_hat_alle_groessen_die_windows_abfragt():
+    """Eine .ico mit nur einer Groesse laesst Windows selbst herunterrechnen.
+
+    Das sieht in der Taskleiste und besonders bei 16 px sichtbar matschig aus.
+    Die Datei wird hier von Hand gelesen statt mit Pillow: das Format ist ein
+    6-Byte-Kopf, danach 16 Byte je Eintrag, und die Groesse steht in den ersten
+    beiden Bytes (0 bedeutet 256).
+    """
+    roh = (WURZEL / "ico.ico").read_bytes()
+    anzahl = int.from_bytes(roh[4:6], "little")
+    vorhanden = set()
+    for i in range(anzahl):
+        eintrag = roh[6 + i * 16:6 + i * 16 + 16]
+        vorhanden.add(eintrag[0] or 256)
+    fehlend = {16, 32, 48, 256} - vorhanden
+    assert not fehlend, f"Im Icon fehlen die Groessen {sorted(fehlend)}"
+
+
 def test_installskript_ist_reines_ascii():
     """Windows PowerShell 5.1 dekodiert UTF-8 ohne BOM falsch.
 

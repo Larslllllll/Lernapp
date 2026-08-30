@@ -22,6 +22,15 @@ graphify-out/
 .werkzeug-a/
 .werkzeug-b/
 
+# Nicht Teil der App - bleibt lokal
+notizen.md
+notizen.md
+logo.md
+spike/
+lernapp/gui_ctk/
+run_ctk.py
+requirements-lock-phase2.txt
+
 # Lokale Nutzerdaten / Secrets
 .env
 .env.*

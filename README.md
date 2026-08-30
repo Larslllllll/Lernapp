@@ -77,11 +77,44 @@ packaging/                  PyInstaller-Spec, Inno-Skript, install.ps1, Release.
 Die harte Regel: **`core` importiert nie ein GUI-Toolkit.** Deshalb hat der
 Wechsel von CustomTkinter zu PySide6 nur die GUI-Schicht gekostet.
 
-Wer tiefer einsteigt: [notizen.md](notizen.md) ist der Fahrplan mit den
-Invarianten, die man nicht aus dem Code ablesen kann — warum Triple-Karten an
-`___` und nicht an Leerzeichen getrennt werden, warum der Identitätsschlüssel
-einer Karte die Fragezeichenkette bleiben muss, und was eine gespeicherte Combo
-beim Laden **nicht** mehr darf.
+## Regeln, die man dem Code nicht ansieht
+
+Wer hier etwas ändert, sollte diese fünf Punkte kennen. Jeder davon ist einmal
+schiefgegangen.
+
+**Der Identitätsschlüssel.** `progress.json` indiziert den Fortschritt
+historisch nach der **Fragezeichenkette**, nicht nach einer ID. Deshalb gilt
+`card.key` == das alte `q`-Feld, und `parse_card()` → `legacy_item()` muss
+verlustfrei bleiben. Wer `key` ändert, entwertet jeden gespeicherten
+Fortschritt.
+
+**Triple-Karten.** Ein Verbpaket (`go / went / gone`) liegt als *drei* Karten
+auf der Platte. Getrennt wird an `___`, **nicht** an Leerzeichen — sonst
+zerbrechen mehrwortige Formen wie `been able`, `had to` oder `was/were`. Genau
+daran ist die Vorgängerversion gescheitert. Die Paketidentität ist ein
+geordnetes Tupel, kein `frozenset`, sonst kollabiert `must / had to / had to`
+zu einem Eintrag.
+
+**Zählung.** Ein Triple-Paket ist **eine** Lerneinheit. `lerneinheiten()` ist
+die einzige Quelle dafür — Seitenleiste, Fortschrittsbalken und Statistik
+müssen alle dieselbe Zahl benutzen.
+
+**Asymmetrie bei der Bewertung.** Richtig erhöht die Serie nur der beantworteten
+Karte; falsch setzt das ganze Paket zurück. Das ist Absicht. `round_errors`
+steuert Wiederholung und wird pro Runde geleert, `total_errors` ist die
+Historie und bleibt. Eine gespeicherte Combo darf beim Laden **keinen**
+Multiplikator mehr geben — das war ein Exploit.
+
+**Schichten.** `core` importiert nie ein GUI-Toolkit, und `winsound`/`AppKit`
+stehen nur in `platform_services`. QML stellt ausschließlich dar: keine
+Schwellen, keine Formeln, keine Kartenlogik. `if (combo >= 7) multiplier = 3`
+gehört in den Core. Farben, Radien und Zeiten kommen alle aus dem Singleton
+`qml/theme/Theme.qml`, nie als Hex-Wert in eine View.
+
+Die Kartenauswahl nutzt einen injizierten `rng`, damit Tests reproduzierbar
+sind — nie global `random`. Und `storage` schreibt atomar (Temp-Datei plus
+`os.replace`) und legt einmal je Sitzung ein Backup an; beschädigte Dateien
+werden beiseitegelegt statt überschrieben.
 
 ## Mitmachen
 

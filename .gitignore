@@ -17,6 +17,9 @@ venv/
 *.exe
 LernApp-Setup-*.exe
 
+# Werkzeug-Output
+.playwright-mcp/
+
 # Lokale Nutzerdaten / Secrets
 .env
 .env.*

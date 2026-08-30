@@ -4,6 +4,8 @@ Der Sender wird hereingereicht, das Warten auch. Kein Test schläft wirklich.
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from lernapp.netz import github_anmeldung as g
@@ -142,3 +144,19 @@ def test_unbekannter_fehler_wird_trotzdem_lesbar():
     ]})
     with pytest.raises(g.AnmeldungFehler, match="Etwas ist schiefgelaufen"):
         g.frage_token(_code(), sender, KENNUNG)
+
+
+def test_eine_client_id_ist_eingebaut():
+    """Ohne sie kann niemand veröffentlichen.
+
+    Die ID ist öffentlich und gehört ins Repo - im Gegensatz zum Client
+    Secret, das es bei diesem Verfahren bewusst nicht gibt.
+    """
+    assert g.CLIENT_ID.startswith("Ov23li"), "Client ID fehlt oder sieht falsch aus"
+    assert len(g.CLIENT_ID) >= 20
+
+
+def test_kein_client_secret_im_modul():
+    """Ein Secret in einer ausgelieferten .exe ist kein Secret."""
+    quelltext = Path(g.__file__).read_text(encoding="utf-8")
+    assert "client_secret" not in quelltext.lower()

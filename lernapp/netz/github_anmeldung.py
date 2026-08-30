@@ -28,7 +28,7 @@ from typing import Callable
 # Öffentlich und ungefährlich - im Gegensatz zum Client Secret, das es hier
 # bewusst nicht gibt. Ohne Eintrag meldet sich die App verständlich, statt
 # gegen GitHub zu laufen und einen kryptischen Fehler zu zeigen.
-CLIENT_ID = ""
+CLIENT_ID = "Ov23liZ18mucQn6mt8K4"
 
 GERAETECODE_URL = "https://github.com/login/device/code"
 TOKEN_URL = "https://github.com/login/oauth/access_token"

@@ -158,7 +158,10 @@ def vergleiche(eingabe: str, erwartete: list[str],
 
     `andere_antworten` sind die gültigen Antworten der ÜBRIGEN Karten des
     Lernsets. Was dort vorkommt, ist kein Vertipper, sondern die falsche
-    Vokabel - siehe die vierte Regel oben.
+    Vokabel - siehe die vierte Regel oben. Sie müssen bereits normalisiert
+    sein (klein, ohne Rand-Leerzeichen), wie `akzeptierte_antworten()` sie
+    liefert: sie hier jedes Mal durchzugehen kostete im Lernen mit einem
+    350-Karten-Set spürbar Zeit.
     """
     getippt = " ".join(eingabe.strip().lower().split())
     kandidaten = [" ".join(e.strip().lower().split()) for e in erwartete if e.strip()]
@@ -175,8 +178,7 @@ def vergleiche(eingabe: str, erwartete: list[str],
     # Ist das Getippte selbst eine richtige Antwort aus diesem Lernset? Dann
     # war es keine verrutschte Hand, sondern die falsche Vokabel. Diese
     # Prüfung kommt VOR der Akzentprüfung: `ou` und `où` sind zwei Wörter.
-    fremde = {" ".join(str(a).strip().lower().split()) for a in andere_antworten}
-    if getippt in fremde:
+    if getippt in andere_antworten:
         return Vergleich(False, False, entfernung, False, bester)
 
     # Nur die Akzente vergessen? Das ist die häufigste Abweichung in

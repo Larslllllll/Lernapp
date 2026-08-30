@@ -276,3 +276,98 @@ def test_statistik_nutzt_gesamtfehler_nicht_rundenfehler():
     st = s.statistik()
     assert st["falsch"] == 1
     assert st["schwerste_karten"] == [(key, 1)], "Historie ueberlebt den Rundenwechsel"
+
+
+# -- Tippfehler: weder richtig noch falsch ------------------------------------
+
+def _sitzung_mit(items, seed=1):
+    return LearningSession(parse_items(items), rng=random.Random(seed))
+
+
+TIPPFEHLER_ITEMS = [
+    {"q": "la maison", "a": "das haus"},
+    {"q": "le chien", "a": "der hund"},
+    {"q": "la fenetre", "a": "das fenster"},
+]
+
+
+def test_vertipper_reisst_die_combo_nicht_ab():
+    """Der eigentliche Zweck: ein verrutschter Finger darf eine lange Serie
+    nicht vernichten."""
+    sitzung = _sitzung_mit(TIPPFEHLER_ITEMS)
+    # erst zwei richtige Antworten für eine Combo
+    for _ in range(2):
+        frage = sitzung.naechste_frage()
+        sitzung.antworte(frage.card.erwartet(frage.rueckwaerts))
+    vorher = sitzung.fortschritt.current_combo
+    assert vorher == 2
+
+    frage = sitzung.naechste_frage()
+    richtig = frage.card.erwartet(frage.rueckwaerts)
+    ergebnis = sitzung.antworte(richtig + "x")      # ein Zeichen zu viel
+
+    assert ergebnis.richtig is False
+    assert ergebnis.fast is True
+    assert ergebnis.hinweis
+    assert sitzung.fortschritt.current_combo == vorher, "Combo wurde abgerissen"
+
+
+def test_vertipper_gibt_kein_xp_und_keinen_streak():
+    sitzung = _sitzung_mit(TIPPFEHLER_ITEMS)
+    frage = sitzung.naechste_frage()
+    schluessel = frage.card.key
+    ergebnis = sitzung.antworte(frage.card.erwartet(frage.rueckwaerts) + "x")
+
+    assert ergebnis.xp == 0
+    assert sitzung.fortschritt.xp == 0
+    assert sitzung.fortschritt.streaks.get(schluessel, 0) == 0
+
+
+def test_vertipper_zaehlt_nicht_in_die_fehlerhistorie():
+    """total_errors ist die Historie für die Statistik - ein Tippfehler
+    gehört dort nicht hinein."""
+    sitzung = _sitzung_mit(TIPPFEHLER_ITEMS)
+    frage = sitzung.naechste_frage()
+    schluessel = frage.card.key
+    sitzung.antworte(frage.card.erwartet(frage.rueckwaerts) + "x")
+
+    assert sitzung.fortschritt.total_errors.get(schluessel, 0) == 0
+    assert sitzung.fortschritt.total_wrong == 0
+    # aber die Karte kommt in dieser Runde wieder
+    assert sitzung.fortschritt.round_errors.get(schluessel, 0) == 1
+
+
+def test_eine_wirklich_falsche_antwort_bleibt_falsch():
+    sitzung = _sitzung_mit(TIPPFEHLER_ITEMS)
+    frage = sitzung.naechste_frage()
+    ergebnis = sitzung.antworte("voellig daneben")
+
+    assert ergebnis.richtig is False
+    assert ergebnis.fast is False
+    assert sitzung.fortschritt.total_wrong == 1
+    assert sitzung.fortschritt.current_combo == 0
+
+
+def test_eine_andere_vokabel_desselben_lernsets_ist_kein_vertipper():
+    """`der hund` als Antwort auf `la maison` ist eine falsche Vokabel."""
+    items = [{"q": "brechen", "a": "broke"}, {"q": "gebrochen", "a": "broken"}]
+    sitzung = _sitzung_mit(items)
+    frage = sitzung.naechste_frage()
+    andere = "broken" if frage.card.erwartet(False) == "broke" else "broke"
+
+    ergebnis = sitzung.antworte(andere)
+    assert ergebnis.fast is False, "andere Verbform als Vertipper durchgewunken"
+    assert sitzung.fortschritt.current_combo == 0
+
+
+def test_bei_triple_karten_gibt_es_keine_nachsicht():
+    """Dort IST die genaue Form die Aufgabe."""
+    items = [
+        {"q": "go ___ ___", "a": "went, gone"},
+        {"q": "___ went ___", "a": "go, gone"},
+        {"q": "___ ___ gone", "a": "go, went"},
+    ]
+    sitzung = _sitzung_mit(items)
+    frage = sitzung.naechste_frage()
+    ergebnis = sitzung.antworte(["wentx", "gonex"])
+    assert ergebnis.fast is False

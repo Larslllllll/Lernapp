@@ -20,6 +20,9 @@ from .app_state import AppState
 NEUTRAL = "neutral"
 RICHTIG = "richtig"
 FALSCH = "falsch"
+# Weder richtig noch falsch: ein Vertipper. Eigene Art, damit die Ansicht ihn
+# anders einfärben kann als eine falsche Antwort.
+FAST = "fast"
 LEVELUP = "levelup"
 RUNDE = "runde"
 
@@ -252,7 +255,10 @@ class LearningViewModel(QObject):
         self._gesperrt = True
         ergebnis = self._session.antworte(werte if len(werte) > 1 else werte[0])
         if self._state.settings.get("sound", True):
-            dienste().spiele_ton(ergebnis.richtig)
+            # Ein Vertipper klingt nicht wie ein Fehler - das wäre genau die
+            # Bestrafung, die er nicht sein soll.
+            if not ergebnis.fast:
+                dienste().spiele_ton(ergebnis.richtig)
 
         if ergebnis.richtig:
             mult = f"  ×{ergebnis.multiplikator:g}" if ergebnis.multiplikator > 1 else ""
@@ -265,6 +271,9 @@ class LearningViewModel(QObject):
             else:
                 self._setze_feedback(f"Richtig   +{ergebnis.xp} XP{mult}{auch}", RICHTIG)
             self.comboPuls.emit()
+        elif ergebnis.fast:
+            self._setze_feedback(
+                f"{ergebnis.hinweis}   ·   {ergebnis.loesung}", FAST)
         else:
             self._setze_feedback(f"Richtig wäre:  {ergebnis.loesung}", FALSCH)
 

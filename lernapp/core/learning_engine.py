@@ -12,7 +12,7 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass, field
 
-from . import rules
+from . import rules, tippfehler
 from .cards import NormalCard, TripleCard, gruppiere_pakete, lerneinheiten
 from .progress import SetProgress
 
@@ -41,6 +41,23 @@ class Frage:
         return self.card.zeigt(self.rueckwaerts)
 
 
+class _OhneEigene:
+    """Menge minus ein paar Einträge, ohne sie zu kopieren.
+
+    Gebraucht wird nur `in`. Ein `set.difference` über 350 Wörter bei jeder
+    falschen Antwort war messbar teuer.
+    """
+
+    __slots__ = ("_menge", "_eigene")
+
+    def __init__(self, menge: set[str], eigene) -> None:
+        self._menge = menge
+        self._eigene = frozenset(eigene)
+
+    def __contains__(self, wert: object) -> bool:
+        return wert in self._menge and wert not in self._eigene
+
+
 @dataclass
 class Ergebnis:
     """Was eine Antwort bewirkt hat."""
@@ -52,6 +69,10 @@ class Ergebnis:
     multiplikator: float = 1.0
     loesung: str = ""
     weitere: list[str] = field(default_factory=list)
+    # "Fast" ist weder richtig noch falsch: die Karte kommt wieder, aber
+    # Combo und Streak bleiben stehen. Siehe core.tippfehler.
+    fast: bool = False
+    hinweis: str = ""
 
 
 class SessionZustand:
@@ -77,6 +98,8 @@ class LearningSession:
         for k in karten:
             self._nach_key.setdefault(k.key, k)
         self.karten = list(self._nach_key.values())
+        # Je Richtung einmal gebildet, siehe _fremde_antworten.
+        self._alle_antworten: dict[bool, set[str]] = {}
 
         self.fortschritt = fortschritt or SetProgress()
         self.rng = rng or random.Random()
@@ -129,6 +152,29 @@ class LearningSession:
     def _streak_gruppe(self, card) -> list[str]:
         """Alle Streak-Schlüssel, die bei einem Fehler gemeinsam fallen."""
         return self._paket_keys.get(card.key, [card.key])
+
+    def _fremde_antworten(self, card, rueckwaerts: bool) -> set[str]:
+        """Alle gültigen Antworten der ÜBRIGEN Karten dieses Lernsets.
+
+        Ohne diesen Kontext gilt `broken` als Vertipper von `broke` - und
+        genau diesen Unterschied soll man ja lernen.
+
+        Die Gesamtmenge wird je Richtung einmal gebildet und behalten. Sie
+        bei jeder falschen Antwort neu über alle Karten aufzubauen hat den
+        Testlauf von 14 auf 72 Sekunden gebracht - bei 351 Karten in einem
+        Lernset ist das im Lernen genauso spürbar.
+        """
+        menge = self._alle_antworten.get(rueckwaerts)
+        if menge is None:
+            menge = set()
+            for andere in self.karten:
+                if not andere.is_triple:
+                    menge.update(andere.akzeptierte_antworten(rueckwaerts))
+            self._alle_antworten[rueckwaerts] = menge
+        # Die eigenen Antworten der Karte gehören nicht dazu - sonst gälte
+        # die richtige Antwort als "andere Vokabel". Nur diese wenigen
+        # abziehen, nicht die ganze Menge kopieren.
+        return _OhneEigene(menge, card.akzeptierte_antworten(rueckwaerts))
 
     def _fehlerkarten(self) -> set[str]:
         return {
@@ -197,6 +243,22 @@ class LearningSession:
                 loesung=loesung,
                 weitere=weitere,
             )
+
+        # Nur ein Vertipper? Dann kommt die Karte wieder, aber die Combo
+        # bleibt stehen. Bei Triple-Karten gilt das nicht: dort IST die
+        # genaue Form die Aufgabe.
+        if not card.is_triple:
+            vergleich = tippfehler.vergleiche(
+                text, card.akzeptierte_antworten(frage.rueckwaerts),
+                self._fremde_antworten(card, frage.rueckwaerts),
+            )
+            if vergleich.fast:
+                self.fortschritt.nochmal(gruppe)
+                return Ergebnis(
+                    richtig=False, fast=True,
+                    combo=self.fortschritt.current_combo,
+                    loesung=loesung, hinweis=vergleich.grund,
+                )
 
         # Falsch setzt das ganze Paket zurück.
         self.fortschritt.falsch(gruppe)

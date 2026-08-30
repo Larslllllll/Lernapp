@@ -18,6 +18,9 @@ Item {
     readonly property color feedbackFarbe:
           lernen.feedbackArt === "richtig" ? Theme.success
         : lernen.feedbackArt === "falsch"  ? Theme.error
+        // Ein Vertipper ist kein Fehler - er bekommt deshalb nicht Rot,
+        // sondern die Warnfarbe.
+        : lernen.feedbackArt === "fast"    ? Theme.warning
         : lernen.feedbackArt === "levelup" ? Theme.warning
         : Theme.textSecondary
 
@@ -67,7 +70,10 @@ Item {
     Timer { id: fokusTimer; interval: 60; onTriggered: view.ersteEingabeFokussieren() }
     Timer {
         id: weiterTimer
-        interval: lernen.feedbackArt === "falsch" ? 1900 : 1150
+        // Bei Fehlern und Vertippern länger stehen lassen - man will die
+        // richtige Schreibweise lesen können.
+        interval: lernen.feedbackArt === "falsch" || lernen.feedbackArt === "fast"
+                  ? 1900 : 1150
         onTriggered: lernen.weiter()
     }
 
@@ -179,6 +185,7 @@ Item {
                 border.width: 1
                 border.color: lernen.feedbackArt === "richtig" || lernen.feedbackArt === "levelup"
                                 ? Theme.success
+                            : lernen.feedbackArt === "fast" ? Theme.warning
                             : lernen.feedbackArt === "falsch" ? Theme.error
                             : Theme.border
                 Behavior on border.color { ColorAnimation { duration: Theme.dauerNormal } }

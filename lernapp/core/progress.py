@@ -68,6 +68,19 @@ class SetProgress:
         self.round_errors[haupt] = self.round_errors.get(haupt, 0) + 1
         self.total_errors[haupt] = self.total_errors.get(haupt, 0) + 1
 
+    def nochmal(self, keys: list[str]) -> None:
+        """Karte in dieser Runde wiederholen, ohne sie als Fehler zu werten.
+
+        Für Tippfehler: die Schreibweise sitzt noch nicht, also kommt die
+        Karte wieder. Aber Combo, Streak und die Fehlerhistorie bleiben
+        unberührt - ein verrutschter Finger ist keine Wissenslücke.
+
+        Bewusst NICHT `total_errors`: das ist die Historie für die Statistik,
+        und dort gehört ein Tippfehler nicht hinein.
+        """
+        haupt = keys[0]
+        self.round_errors[haupt] = self.round_errors.get(haupt, 0) + 1
+
     def neue_runde(self) -> None:
         """Rundenwechsel: nur die Rundenfehler und die Combo werden geleert."""
         self.round_errors.clear()

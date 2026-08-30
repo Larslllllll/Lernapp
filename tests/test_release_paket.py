@@ -61,11 +61,11 @@ def test_installer_verteilt_das_bundle_als_ordner():
 
 
 def test_icon_hat_alle_groessen_die_windows_abfragt():
-    """Eine .ico mit nur einer Größe lässt Windows selbst herunterrechnen.
+    """Eine .ico mit nur einer Grösse lässt Windows selbst herunterrechnen.
 
     Das sieht in der Taskleiste und besonders bei 16 px sichtbar matschig aus.
     Die Datei wird hier von Hand gelesen statt mit Pillow: das Format ist ein
-    6-Byte-Kopf, danach 16 Byte je Eintrag, und die Größe steht in den ersten
+    6-Byte-Kopf, danach 16 Byte je Eintrag, und die Grösse steht in den ersten
     beiden Bytes (0 bedeutet 256).
     """
     roh = (WURZEL / "ico.ico").read_bytes()

@@ -63,7 +63,7 @@ def standard_data() -> dict:
                 "lernsets": [
                     {
                         "id": str(uuid.uuid4()),
-                        "name": "Unregelmäßige Verben",
+                        "name": "Unregelmässige Verben",
                         "items": standard_items(),
                     }
                 ]

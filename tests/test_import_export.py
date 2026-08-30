@@ -165,7 +165,7 @@ def test_import_ohne_namen_bekommt_einen():
 
 @pytest.mark.parametrize("name,erwartet", [
     ("Unite 4", "Unite-4" + DATEIENDUNG),
-    ("Unregelmäßige Verben", "Unregelmäßige-Verben" + DATEIENDUNG),
+    ("Unregelmässige Verben", "Unregelmässige-Verben" + DATEIENDUNG),
     ('bad<>:"/\\|?*name', "bad---------name" + DATEIENDUNG),
     ("   ", "Lernset" + DATEIENDUNG),
 ])

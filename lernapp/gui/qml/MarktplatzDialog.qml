@@ -225,7 +225,7 @@ Dialog {
             Layout.rightMargin: Theme.abstandL
             Layout.bottomMargin: Theme.abstandM
             implicitHeight: 34
-            text: "Schließen"
+            text: "Schliessen"
             onClicked: dlg.close()
         }
     }

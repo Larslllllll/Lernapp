@@ -112,7 +112,7 @@ def test_zwei_fehler_erst_ab_zwoelf_zeichen():
 
 def test_eine_andere_richtige_antwort_ist_nie_ein_vertipper():
     """`broke` und `broken` unterscheidet eine Einfügung - genau die Sorte
-    Fehler, die sonst verziehen wird. Bei unregelmäßigen Verben ist das aber
+    Fehler, die sonst verziehen wird. Bei unregelmässigen Verben ist das aber
     der Kern der Sache."""
     ohne_kontext = t.vergleiche("broken", ["broke"])
     assert ohne_kontext.fast is True, "ohne Kontext sieht es wie ein Vertipper aus"

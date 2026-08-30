@@ -67,7 +67,7 @@ class Katalog:
 
 
 def lade_ueber_netz(url: str) -> bytes:
-    """Standardlader. Nur HTTPS, mit Zeitlimit und Größengrenze."""
+    """Standardlader. Nur HTTPS, mit Zeitlimit und Grössengrenze."""
     if not url.startswith("https://"):
         raise MarktplatzFehler("Nur HTTPS-Adressen werden geladen.")
     anfrage = urllib.request.Request(url, headers={"User-Agent": "LernApp"})
@@ -85,7 +85,7 @@ def lade_ueber_netz(url: str) -> bytes:
             "Keine Verbindung zum Marktplatz. Internetverbindung prüfen."
         ) from grund
     if len(daten) > MAX_BYTES:
-        raise MarktplatzFehler("Die Datei ist unerwartet groß und wurde verworfen.")
+        raise MarktplatzFehler("Die Datei ist unerwartet gross und wurde verworfen.")
     return daten
 
 
@@ -121,7 +121,7 @@ def lade_katalog(lader: Lader = lade_ueber_netz,
 
     version = roh.get("schema_version")
     if version != SCHEMA:
-        # Größer heisst: der Marktplatz ist weiter als diese App. Kleiner
+        # Grösser heisst: der Marktplatz ist weiter als diese App. Kleiner
         # sollte nie vorkommen; beides ist derselbe Rat an den Nutzer.
         raise MarktplatzFehler(
             "Der Marktplatz braucht eine neuere Version von LernApp."

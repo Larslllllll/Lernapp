@@ -68,6 +68,7 @@ Rectangle {
                         id: ordnerBlock
                         required property var modelData
                         readonly property string ordnerName: modelData.name
+                        readonly property bool zu: sets.eingeklappt.indexOf(modelData.name) >= 0
 
                         Layout.fillWidth: true
                         implicitHeight: ordnerSpalte.implicitHeight + 2 * Theme.abstandXs
@@ -102,14 +103,47 @@ Rectangle {
 
                             RowLayout {
                                 Layout.fillWidth: true
+                                spacing: 2
+
+                                // Der Pfeil dreht sich beim Umklappen, damit
+                                // sichtbar ist, was gerade passiert ist.
+                                Text {
+                                    text: "▸"
+                                    color: Theme.textSecondary
+                                    font.pixelSize: 13
+                                    leftPadding: Theme.abstandXs
+                                    rotation: ordnerBlock.zu ? 0 : 90
+                                    Behavior on rotation {
+                                        NumberAnimation { duration: Theme.dauerSchnell }
+                                    }
+                                    // Die Klickflaeche gehoert IN den Text, nicht
+                                    // daneben: ein MouseArea direkt im RowLayout
+                                    // wird selbst zum Layout-Element und draengt
+                                    // die Beschriftungen hinaus.
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        anchors.margins: -4
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: sets.klappeUm(ordnerBlock.ordnerName)
+                                    }
+                                }
                                 Text {
                                     Layout.fillWidth: true
                                     text: ordnerBlock.ordnerName
+                                          + (ordnerBlock.zu
+                                             ? "   " + ordnerBlock.modelData.lernsets.length
+                                             : "")
                                     color: Theme.textPrimary
                                     font.pixelSize: Theme.schriftM
                                     font.bold: true
                                     elide: Text.ElideRight
                                     leftPadding: Theme.abstandXs
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: sets.klappeUm(ordnerBlock.ordnerName)
+                                    }
                                 }
                                 ToolButton {
                                     implicitWidth: 28; implicitHeight: 26
@@ -131,7 +165,10 @@ Rectangle {
                             }
 
                             Repeater {
-                                model: ordnerBlock.modelData.lernsets
+                                // Beim Zuklappen wird der Inhalt gar nicht
+                                // erst gebaut - das haelt lange Listen
+                                // fluessig.
+                                model: ordnerBlock.zu ? [] : ordnerBlock.modelData.lernsets
                                 delegate: Item {
                                     id: eintrag
                                     required property var modelData

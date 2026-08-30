@@ -5,7 +5,7 @@ Zwei Eigenschaften sind hier wichtiger als die reine Funktion:
   * Das Log darf nie im echten Datenverzeichnis landen (deshalb überall
     ein `basis`-Argument bzw. LERNAPP_DATA_DIR).
   * Es darf nichts Persönliches enthalten - insbesondere keine Pfade
-    außerhalb des Datenverzeichnisses. Ein Traceback nennt aber immer den
+    ausserhalb des Datenverzeichnisses. Ein Traceback nennt aber immer den
     Installationsort, und der enthält den Windows-Benutzernamen.
 """
 from __future__ import annotations

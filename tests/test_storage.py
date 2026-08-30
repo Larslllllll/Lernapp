@@ -90,13 +90,13 @@ def test_beschaedigte_datei_wird_nicht_ueberschrieben(tmp_path):
 def test_umlaute_ueberleben_den_roundtrip(tmp_path):
     ziel = tmp_path / "data.json"
     daten = {"folders": {"Französisch": {"lernsets": [
-        {"id": "x", "name": "Unregelmäßige Verben",
+        {"id": "x", "name": "Unregelmässige Verben",
          "items": [{"q": "être", "a": "sein"}]}]}}}
     store.save_data(daten, ziel)
     zurueck = store.load_data(ziel)
     assert "Französisch" in zurueck["folders"]
     ls = zurueck["folders"]["Französisch"]["lernsets"][0]
-    assert ls["name"] == "Unregelmäßige Verben"
+    assert ls["name"] == "Unregelmässige Verben"
     assert ls["items"][0]["q"] == "être"
 
 

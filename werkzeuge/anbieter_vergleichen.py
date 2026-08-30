@@ -9,7 +9,7 @@ einer Meinung - meiner eingeschlossen.
 Geprüft wird dabei automatisch, was sich automatisch prüfen lässt: Kommt die
 Vokabel im Satz vor? Ist er kurz genug? Steht am Ende ein Punkt? Ein
 Beispielsatz, der die Vokabel gar nicht enthält, ist wertlos, und das kommt
-bei kleineren Modellen regelmäßig vor.
+bei kleineren Modellen regelmässig vor.
 
 Schlüssel kommen aus der Umgebung:
 

@@ -76,7 +76,7 @@ GESPERRT = frozenset({
 })
 
 # Wörter, die eine Grundform enthalten, aber harmlos sind. Ohne diese Liste
-# stolpert der Filter über die eigenen Füße - das ist der klassische
+# stolpert der Filter über die eigenen Füsse - das ist der klassische
 # Fehler, an dem Wortfilter scheitern.
 AUSNAHMEN = frozenset({
     "snigger", "sniggers", "sniggering", "sniggered",
@@ -171,7 +171,7 @@ def _auseinandergezogen(text: str) -> list[str]:
 
 
 def pruefe(text: str, fundstelle: str = "") -> list[Treffer]:
-    """Alle Verstöße in einem Text. Leere Liste heisst: in Ordnung."""
+    """Alle Verstösse in einem Text. Leere Liste heisst: in Ordnung."""
     if not text:
         return []
 

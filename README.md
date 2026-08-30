@@ -4,7 +4,7 @@ Ein Vokabeltrainer als native Windows-Desktop-App. Kein Konto, kein Server,
 keine Werbung — alles, was du lernst, bleibt auf deinem Rechner.
 
 Entstanden als Schulprojekt, weil die üblichen Vokabel-Apps entweder Geld
-kosten, Daten sammeln oder unregelmäßige Verben nicht richtig abfragen können.
+kosten, Daten sammeln oder unregelmässige Verben nicht richtig abfragen können.
 
 ## Installieren
 
@@ -38,7 +38,7 @@ bleibt sonst still, gelernt wird weiter.
 
 ## Was die App kann
 
-- **Unregelmäßige Verben richtig.** `go / went / gone` ist ein Paket aus drei
+- **Unregelmässige Verben richtig.** `go / went / gone` ist ein Paket aus drei
   Karten, das als *eine* Lerneinheit zählt. Eine richtige Antwort zählt nur für
   die beantwortete Form, ein Fehler setzt das ganze Paket zurück.
 - **Vokabeln als Liste einfügen** — aus Word, Excel oder vom Handy, mit
@@ -53,7 +53,7 @@ bleibt sonst still, gelernt wird weiter.
 
 Alles liegt unter `%USERPROFILE%\.lernapp` — Lernsets, Fortschritt,
 Einstellungen und automatische Sicherungskopien. Nichts wird ins Internet
-geschickt; die App spricht ausschließlich beim Update-Check mit dem Netz.
+geschickt; die App spricht ausschliesslich beim Update-Check mit dem Netz.
 Eine Deinstallation lässt diesen Ordner absichtlich stehen.
 
 ## Selbst bauen
@@ -78,7 +78,7 @@ gebraucht (`winget install JRSoftware.InnoSetup`).
 
 Das App-Icon wird aus `packaging/icon-quelle.png` erzeugt, nicht von Hand
 gepflegt — `packaging/icon_bauen.py` schneidet den Rand ab und legt alle
-Größen ab, die Windows abfragt (16 bis 256 px).
+Grössen ab, die Windows abfragt (16 bis 256 px).
 
 ## Aufbau
 
@@ -122,7 +122,7 @@ Historie und bleibt. Eine gespeicherte Combo darf beim Laden **keinen**
 Multiplikator mehr geben — das war ein Exploit.
 
 **Schichten.** `core` importiert nie ein GUI-Toolkit, und `winsound`/`AppKit`
-stehen nur in `platform_services`. QML stellt ausschließlich dar: keine
+stehen nur in `platform_services`. QML stellt ausschliesslich dar: keine
 Schwellen, keine Formeln, keine Kartenlogik. `if (combo >= 7) multiplier = 3`
 gehört in den Core. Farben, Radien und Zeiten kommen alle aus dem Singleton
 `qml/theme/Theme.qml`, nie als Hex-Wert in eine View.

@@ -4,7 +4,7 @@ Diese Anleitung ist für Windows 11. Du brauchst keine Administratorrechte und
 keine Vorkenntnisse — es reicht, der Reihe nach durchzugehen.
 
 macOS gibt es noch nicht. Wenn du einen Mac hast: melde dich bei Lars, dann
-weiß er, dass sich der Aufwand lohnt.
+weiss er, dass sich der Aufwand lohnt.
 
 ---
 
@@ -24,7 +24,7 @@ Einfügen geht mit Rechtsklick oder `Strg` + `V`.
 
 Das Fenster meldet dann der Reihe nach, was es tut: Version nachschlagen,
 Setup-Datei laden, Prüfsumme vergleichen, installieren. Am Ende startet LernApp
-von selbst. Das Fenster kannst du danach schließen.
+von selbst. Das Fenster kannst du danach schliessen.
 
 **Warum kommt hier keine Warnung?** Die blaue SmartScreen-Meldung (siehe unten)
 hängt an einer Markierung, die dein *Browser* an heruntergeladene Dateien
@@ -37,7 +37,7 @@ die Datei gelöscht und nichts installiert.
 
 **Später aktualisieren:** derselbe Befehl. Er erkennt, ob schon eine neuere
 Version da ist, und macht nichts, wenn du bereits aktuell bist. Dein
-Fortschritt bleibt dabei erhalten. Wichtig: LernApp vorher schließen.
+Fortschritt bleibt dabei erhalten. Wichtig: LernApp vorher schliessen.
 
 ---
 
@@ -47,7 +47,7 @@ Falls PowerShell bei dir gesperrt ist oder du lieber klickst.
 
 Lade die Setup-Datei von der Seite
 <https://github.com/Larslllllll/Lernapp/releases/latest> herunter — sie
-heißt so:
+heisst so:
 
 ```
 LernApp-Setup-0.9.0.exe
@@ -124,7 +124,7 @@ to go;gehen
 the house;das Haus
 ```
 
-Für unregelmäßige Verben schreibst du drei Formen in eine Zeile:
+Für unregelmässige Verben schreibst du drei Formen in eine Zeile:
 
 ```
 go;went;gone
@@ -144,7 +144,7 @@ Vokabeln erkannt wurden und welche Zeilen es nicht verstanden hat.
 
 ## 5. Ein Lernset von jemand anderem übernehmen
 
-Lernsets kann man als Datei weitergeben. Die heißt zum Beispiel
+Lernsets kann man als Datei weitergeben. Die heisst zum Beispiel
 `englisch-unit-4.lernset.json` und lässt sich ganz normal per Chat, Mail oder
 USB-Stick verschicken.
 
@@ -187,7 +187,7 @@ Darin:
 |---|---|
 | `data.json` | deine Lernsets und Vokabeln |
 | `progress.json` | Fortschritt, XP, Level, Serien |
-| `settings.json` | Einstellungen (Design, Ton, Fenstergröße) |
+| `settings.json` | Einstellungen (Design, Ton, Fenstergrösse) |
 | `backups\` | automatische Sicherungskopien |
 | `logs\` | Fehlerprotokoll (siehe unten) |
 

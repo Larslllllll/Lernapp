@@ -98,7 +98,7 @@ class SettingsViewModel(QObject):
         """
         return dict(dienste().tastenkuerzel())
 
-    # -- Fenstergröße merken ------------------------------------------------
+    # -- Fenstergrösse merken ------------------------------------------------
 
     @Property(int, constant=True)
     def fensterBreite(self) -> int:

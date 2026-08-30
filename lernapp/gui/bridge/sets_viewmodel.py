@@ -38,6 +38,7 @@ class SetsViewModel(QObject):
     # ein Satz darüber, was erkannt wurde.
     vokabelnErkannt = Signal(str, str)
     erkennungGeaendert = Signal()
+    eingeklappteGeaendert = Signal()
 
     def __init__(self, state: AppState) -> None:
         super().__init__()
@@ -296,6 +297,29 @@ class SetsViewModel(QObject):
         self._erkennung_laeuft = False
         self.erkennungGeaendert.emit()
         self.fehler.emit(text)
+
+    # -- Ein- und ausklappen ---------------------------------------------------
+
+    @Property("QVariantList", notify=eingeklappteGeaendert)
+    def eingeklappt(self) -> list:
+        """Namen der zugeklappten Ordner.
+
+        Steht in den Einstellungen, nicht im Speicher: wer seine Ordner
+        zuklappt, will sie beim naechsten Start nicht wieder offen haben.
+        """
+        werte = self._state.settings.get("eingeklappt", [])
+        return [str(w) for w in werte] if isinstance(werte, list) else []
+
+    @Slot(str)
+    def klappeUm(self, ordner: str) -> None:
+        zu = list(self.eingeklappt)
+        if ordner in zu:
+            zu.remove(ordner)
+        else:
+            zu.append(ordner)
+        self._state.settings["eingeklappt"] = zu
+        self._state.save_settings()
+        self.eingeklappteGeaendert.emit()
 
     @Slot(str, result="QVariantMap")
     def textVorschau(self, text: str) -> dict:

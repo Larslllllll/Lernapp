@@ -2,9 +2,9 @@
 
     .venv/Scripts/python.exe packaging/icon_bauen.py
 
-Windows wählt je nach Ort eine andere Größe aus der Datei: 16 px in der
+Windows wählt je nach Ort eine andere Grösse aus der Datei: 16 px in der
 Titelleiste, 32 px in der Taskleiste, 48 px im Explorer, 256 px in der
-Kachelansicht. Eine .ico mit nur einer Größe lässt Windows selbst
+Kachelansicht. Eine .ico mit nur einer Grösse lässt Windows selbst
 herunterrechnen, und das sieht bei 16 px sichtbar matschig aus.
 
 Die Quelle hat rundherum Leerraum um die abgerundete Kachel. Der wird

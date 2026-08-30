@@ -17,7 +17,7 @@ def _start() -> int:
     greift also für alles, was während des Betriebs passiert. Was er nicht
     abdeckt, ist ein Fehler *beim Import* von PySide6: eine fehlende Qt-DLL
     im gebauten Bundle etwa. Genau dann sieht der Nutzer sonst gar nichts,
-    weil das Bundle ohne Konsole läuft. Deshalb dieser äußere Ring.
+    weil das Bundle ohne Konsole läuft. Deshalb dieser äussere Ring.
     """
     from lernapp.storage import protokoll
 

@@ -59,7 +59,7 @@ def test_meldung_nennt_die_logdatei(tmp_path: Path):
 
 
 def test_meldung_kommt_auch_ohne_logdatei():
-    """Ließ sich kein Log anlegen, muss der Nutzer trotzdem etwas sehen."""
+    """Liess sich kein Log anlegen, muss der Nutzer trotzdem etwas sehen."""
     gesehen: list[str] = []
     absturz.installiere_excepthook(None, melden=gesehen.append)
 

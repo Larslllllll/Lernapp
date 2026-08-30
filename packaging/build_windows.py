@@ -3,7 +3,7 @@
     .venv/Scripts/python.exe packaging/build_windows.py
 
 Prüft zuerst die Voraussetzungen, baut dann über packaging/lernapp.spec und
-meldet am Ende Größe und Inhalt. Es wird nichts nachträglich gelöscht -
+meldet am Ende Grösse und Inhalt. Es wird nichts nachträglich gelöscht -
 nicht benötigte Qt-Module sind gar nicht erst installiert.
 """
 from __future__ import annotations

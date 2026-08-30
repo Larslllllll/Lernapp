@@ -1,6 +1,6 @@
 """Protokolldatei und Absturzprotokoll.
 
-Vorher hinterließ ein Absturz beim Nutzer keine Spur: kein Log, kein
+Vorher hinterliess ein Absturz beim Nutzer keine Spur: kein Log, kein
 Excepthook, und im gebauten Bundle gibt es keine Konsole, auf der ein
 Traceback landen könnte. Ein Klassenkamerad konnte einen Fehler also gar nicht
 melden.
@@ -42,7 +42,7 @@ _ZEITFORMAT = "%Y-%m-%d %H:%M:%S"
 
 # Der eigene Handler wird gemerkt, statt ihn später aus ``logger.handlers`` zu
 # fischen: dort hängen unter Umständen fremde Handler (pytest tut das), die uns
-# nicht gehören und die wir weder zählen noch schließen dürfen.
+# nicht gehören und die wir weder zählen noch schliessen dürfen.
 _handler: logging.Handler | None = None
 _pfad: Path | None = None
 
@@ -62,7 +62,7 @@ def anonymisiere(text: str) -> str:
 
     Beide Trennzeichen und beide Schreibweisen, weil derselbe Pfad mal mit
     Backslash und mal als ``C:/Users/...`` auftaucht und der Vergleich unter
-    Windows ohnehin groß-klein-egal ist.
+    Windows ohnehin gross-klein-egal ist.
     """
     heim = str(Path.home())
     ergebnis = text
@@ -135,7 +135,7 @@ def richte_logging_ein(basis: Path | None = None, *,
 
 
 def beende_logging() -> None:
-    """Nur den eigenen Handler schließen.
+    """Nur den eigenen Handler schliessen.
 
     Fremde Handler am selben Logger bleiben unangetastet.
     """

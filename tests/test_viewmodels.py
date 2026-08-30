@@ -508,3 +508,41 @@ def test_standarddateiname_ist_plattformsicher(vms):
     name = sets.standardDateiname("set-a")
     assert name.endswith(".lernset.json")
     assert not any(z in name for z in r'<>:"/\|?*')
+
+
+# -- Ordner ein- und ausklappen ----------------------------------------------
+
+def test_ordner_sind_zuerst_alle_offen(vms):
+    _einst, _lernen, sets = vms
+    assert sets.eingeklappt == []
+
+
+def test_umklappen_merkt_sich_den_ordner(vms):
+    _einst, _lernen, sets = vms
+    sets.klappeUm("Englisch")
+    assert sets.eingeklappt == ["Englisch"]
+    sets.klappeUm("Englisch")
+    assert sets.eingeklappt == []
+
+
+def test_der_zustand_ueberlebt_den_neustart(vms, basis):
+    """Wer seine Ordner zuklappt, will sie nicht bei jedem Start wieder
+    offen vorfinden."""
+    _einst, _lernen, sets = vms
+    sets.klappeUm("Englisch")
+
+    frisch = SetsViewModel(AppState(basis))
+    assert frisch.eingeklappt == ["Englisch"]
+
+
+def test_mehrere_ordner_gleichzeitig(vms):
+    _einst, _lernen, sets = vms
+    sets.klappeUm("Englisch")
+    sets.klappeUm("Franzoesisch")
+    assert set(sets.eingeklappt) == {"Englisch", "Franzoesisch"}
+
+
+def test_kaputter_eintrag_in_den_einstellungen_stoert_nicht(state):
+    """Alte oder von Hand verbogene settings.json darf nichts umwerfen."""
+    state.settings["eingeklappt"] = "kein array"
+    assert SetsViewModel(state).eingeklappt == []

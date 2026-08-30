@@ -24,13 +24,17 @@ from lernapp import __version__  # noqa: E402
 SPEC = WURZEL / "packaging" / "lernapp.spec"
 ISS = WURZEL / "packaging" / "lernapp.iss"
 DIST = WURZEL / "dist"
-# Der Arbeitsordner von PyInstaller liegt bewusst AUSSERHALB des Projekts.
-# Das Projekt liegt in OneDrive, und der Sync-Dienst greift sich jede der
-# tausenden Zwischendateien sofort - das bremst den Build und laesst ihn beim
-# naechsten Lauf am Aufraeumen scheitern. Der Ordner ist reiner Zwischenstand
-# und gehoert nirgends hin, wo er gesichert wird.
+# Arbeitsordner UND fertiges Bundle liegen ausserhalb des Projekts. Das
+# Projekt liegt in OneDrive, und der Sync-Dienst greift sich jede der 2000
+# Dateien sofort - das bremst den Build und laesst ihn beim naechsten Lauf am
+# Aufraeumen scheitern (WinError 5, obwohl nichts laeuft). Beides ist reiner
+# Zwischenstand und gehoert nirgends hin, wo es gesichert wird.
+#
+# In dist/ landet nur die fertige Setup-Datei - eine einzelne Datei, die der
+# Sync problemlos vertraegt, und genau die, die release.py hochlaedt.
 WORK = Path(tempfile.gettempdir()) / "lernapp-pyinstaller"
-ZIEL = DIST / "LernApp"
+BUNDLE = Path(tempfile.gettempdir()) / "lernapp-bundle"
+ZIEL = BUNDLE / "LernApp"
 
 # So oft wird ein gesperrter Ordner erneut angefasst, bevor aufgegeben wird.
 # Das Projekt liegt in OneDrive, und der Sync haelt nach einem Build gern
@@ -113,7 +117,7 @@ def bauen() -> float:
     start = time.perf_counter()
     ergebnis = subprocess.run(
         [sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean",
-         "--distpath", str(DIST), "--workpath", str(WORK), str(SPEC)],
+         "--distpath", str(BUNDLE), "--workpath", str(WORK), str(SPEC)],
         cwd=str(WURZEL),
     )
     if ergebnis.returncode != 0:
@@ -166,7 +170,8 @@ def installer_bauen() -> Path:
     if iscc is None:
         fehler("Inno Setup nicht gefunden. winget install JRSoftware.InnoSetup")
     ergebnis = subprocess.run(
-        [str(iscc), f"/DAppVersion={__version__}", str(ISS)],
+        [str(iscc), f"/DAppVersion={__version__}",
+         f"/DQuellVerzeichnis={ZIEL}", str(ISS)],
         cwd=str(WURZEL / "packaging"),
     )
     if ergebnis.returncode != 0:

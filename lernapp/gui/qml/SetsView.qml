@@ -15,6 +15,7 @@ Rectangle {
     signal bearbeiten(string lernsetId)
     signal neuAnlegen(string ordner)
     signal marktplatzOeffnen()
+    signal veroeffentlichen(string lernsetId)
 
     property string ziehtId: ""
     property string zielOrdner: ""
@@ -273,6 +274,10 @@ Rectangle {
         MenuItem {
             text: "Bearbeiten"
             onTriggered: leiste.bearbeiten(kontext.lernsetId)
+        }
+        MenuItem {
+            text: "Veröffentlichen …"
+            onTriggered: leiste.veroeffentlichen(kontext.lernsetId)
         }
         MenuItem {
             text: "Exportieren …"

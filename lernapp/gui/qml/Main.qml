@@ -66,6 +66,7 @@ ApplicationWindow {
             onBearbeiten: function(lernsetId) { dialog.oeffnenBearbeiten(lernsetId) }
             onNeuAnlegen: function(ordner) { dialog.oeffnenNeu(ordner) }
             onMarktplatzOeffnen: marktplatzDialog.oeffnen()
+            onVeroeffentlichen: function(lernsetId) { publizierenDialog.oeffnen(lernsetId) }
         }
 
         Rectangle {
@@ -95,9 +96,20 @@ ApplicationWindow {
         anchors.centerIn: Overlay.overlay
     }
 
+    PublizierenDialog {
+        id: publizierenDialog
+        anchors.centerIn: Overlay.overlay
+    }
+
     // Fehlermeldungen aus den ViewModels sichtbar machen.
     Connections {
         target: sets
+        function onFehler(text) { hinweis.zeige(text, true) }
+        function onHinweis(text) { hinweis.zeige(text, false) }
+    }
+
+    Connections {
+        target: publizieren
         function onFehler(text) { hinweis.zeige(text, true) }
         function onHinweis(text) { hinweis.zeige(text, false) }
     }

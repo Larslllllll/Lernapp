@@ -21,6 +21,7 @@ from .absturz import installiere_excepthook, setze_hauptfenster
 from .bridge.app_state import AppState
 from .bridge.learning_viewmodel import LearningViewModel
 from .bridge.marktplatz_viewmodel import MarktplatzViewModel
+from .bridge.publizieren_viewmodel import PublizierenViewModel
 from .bridge.sets_viewmodel import SetsViewModel
 from .bridge.settings_viewmodel import SettingsViewModel
 
@@ -90,6 +91,7 @@ def run() -> int:
     lernen = LearningViewModel(state, richtung=einstellungen.richtung)
     sets = SetsViewModel(state)
     markt = MarktplatzViewModel(state)
+    publizieren = PublizierenViewModel(state)
     _verdrahten(sets, lernen, einstellungen)
 
     engine = QQmlApplicationEngine()
@@ -99,6 +101,7 @@ def run() -> int:
     ctx.setContextProperty("sets", sets)
     ctx.setContextProperty("einstellungen", einstellungen)
     ctx.setContextProperty("marktplatz", markt)
+    ctx.setContextProperty("publizieren", publizieren)
 
     engine.load(QUrl.fromLocalFile(str(QML_DIR / "Main.qml")))
     if not engine.rootObjects():

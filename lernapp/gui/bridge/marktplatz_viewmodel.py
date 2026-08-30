@@ -11,46 +11,15 @@ data.json an.
 """
 from __future__ import annotations
 
-import logging
 import uuid
 
-from PySide6.QtCore import Property, QObject, QRunnable, QThreadPool, Signal, Slot
+from PySide6.QtCore import Property, QObject, Signal, Slot
 
 from lernapp.netz import marktplatz
 from lernapp.netz.marktplatz import Eintrag, Katalog, MarktplatzFehler
-from lernapp.storage import protokoll
 
+from . import arbeit
 from .app_state import AppState
-
-_log = logging.getLogger(protokoll.LOGGER_NAME)
-
-
-class _Signale(QObject):
-    """QRunnable ist kein QObject und kann selbst keine Signale senden."""
-
-    fertig = Signal(object)
-    fehlgeschlagen = Signal(str)
-
-
-class _Auftrag(QRunnable):
-    def __init__(self, arbeit) -> None:
-        super().__init__()
-        self._arbeit = arbeit
-        self.signale = _Signale()
-
-    def run(self) -> None:  # läuft im Arbeitsfaden
-        try:
-            self.signale.fertig.emit(self._arbeit())
-        except MarktplatzFehler as grund:
-            self.signale.fehlgeschlagen.emit(str(grund))
-        except Exception:
-            # Alles Unerwartete gehört ins Protokoll, aber der Nutzer soll
-            # keinen Traceback sehen - und die App darf nicht sterben, nur
-            # weil der Marktplatz sich seltsam verhält.
-            _log.exception("Unerwarteter Fehler im Marktplatz")
-            self.signale.fehlgeschlagen.emit(
-                "Beim Laden ist etwas schiefgelaufen. Bitte später erneut versuchen."
-            )
 
 
 class MarktplatzViewModel(QObject):
@@ -146,17 +115,9 @@ class MarktplatzViewModel(QObject):
                 return eintrag
         return None
 
-    def _starte(self, arbeit, beim_erfolg) -> None:
-        if self._synchron:
-            try:
-                beim_erfolg(arbeit())
-            except MarktplatzFehler as grund:
-                self._fehlgeschlagen(str(grund))
-            return
-        auftrag = _Auftrag(arbeit)
-        auftrag.signale.fertig.connect(beim_erfolg)
-        auftrag.signale.fehlgeschlagen.connect(self._fehlgeschlagen)
-        QThreadPool.globalInstance().start(auftrag)
+    def _starte(self, aufgabe, beim_erfolg) -> None:
+        arbeit.starte(aufgabe, beim_erfolg, self._fehlgeschlagen,
+                      (MarktplatzFehler,), self._synchron)
 
     def _setze_laedt(self, wert: bool) -> None:
         if self._laedt != wert:

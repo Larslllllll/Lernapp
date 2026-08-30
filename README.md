@@ -24,6 +24,13 @@ Ausführlich erklärt in [docs/INSTALLATION.md](docs/INSTALLATION.md).
 
 macOS ist geplant, existiert aber noch nicht.
 
+## Fertige Lernsets
+
+Wer nicht bei null anfangen will, findet unter
+[Lernapp-lernsets](https://github.com/Larslllllll/Lernapp-lernsets) fertige Sammlungen zum Herunterladen und
+Importieren — aktuell 24 Sets aus Französisch, Englisch und Latein.
+Eigene beisteuern geht per Pull Request.
+
 ## Was die App kann
 
 - **Unregelmäßige Verben richtig.** `go / went / gone` ist ein Paket aus drei

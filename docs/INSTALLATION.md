@@ -148,6 +148,10 @@ Lernsets kann man als Datei weitergeben. Die heißt zum Beispiel
 `englisch-unit-4.lernset.json` und lässt sich ganz normal per Chat, Mail oder
 USB-Stick verschicken.
 
+**Fertige Lernsets gibt es hier:** https://github.com/Larslllllll/Lernapp-lernsets
+Dort liegen Sammlungen für Französisch, Englisch und Latein. Auf
+**herunterladen** klicken, dann wie unten beschrieben importieren.
+
 **Bekommen und einlesen:**
 
 1. Datei irgendwohin speichern, wo du sie wiederfindest (Downloads reicht).

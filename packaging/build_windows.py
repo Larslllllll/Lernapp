@@ -50,6 +50,11 @@ ERWARTETE_QT_MODULE = [
     "Qt6QuickDialogs2.dll", "Qt6QuickDialogs2QuickImpl.dll",
 ]
 
+# Reine Python-Pakete, die im Archiv der .exe landen müssen. Fehlt eines,
+# fällt es erst beim Nutzer auf - und zwar genau an der Stelle, an der die
+# Funktion gebraucht wird.
+ERWARTETE_PAKETE = ["pypdf"]
+
 # Diese dürfen NIE auftauchen - sie stecken in PySide6-Addons.
 VERBOTENE_QT_MODULE = [
     "Qt6WebEngineCore.dll", "Qt63DCore.dll", "Qt6Charts.dll",
@@ -148,6 +153,16 @@ def pruefe_ergebnis() -> None:
         fehler("Main.qml fehlt im Bundle")
     if not (qml / "theme" / "qmldir").exists():
         fehler("theme/qmldir fehlt - der Theme-Singleton wuerde nicht laden")
+
+    # Reine Python-Pakete liegen nicht als Datei im Bundle, sondern im Archiv
+    # in der .exe. Ein Blick in den Ordner sagt darüber nichts - deshalb das
+    # Inhaltsverzeichnis lesen, das PyInstaller beim Bauen schreibt.
+    inhalt = WORK / "lernapp" / "PYZ-00.toc"
+    if inhalt.exists():
+        verzeichnis = inhalt.read_text(encoding="utf-8", errors="replace")
+        for paket in ERWARTETE_PAKETE:
+            if f"'{paket}'" not in verzeichnis and f"'{paket}." not in verzeichnis:
+                fehler(f"{paket} fehlt im Bundle - der PDF-Import wäre tot")
 
 
 def _iscc() -> Path | None:

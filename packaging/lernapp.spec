@@ -26,7 +26,10 @@ a = Analysis(
     pathex=[str(WURZEL)],
     binaries=[],
     datas=qml_datas + [(str(ICON), ".")],
-    hiddenimports=[],
+    # pypdf wird erst in der Funktion importiert, damit ein fehlendes Paket
+    # die App nicht am Start hindert. Hier trotzdem ausdruecklich nennen,
+    # damit PyInstaller es sicher einpackt.
+    hiddenimports=["pypdf"],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

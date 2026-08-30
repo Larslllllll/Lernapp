@@ -377,14 +377,18 @@ Dialog {
         contentItem: ColumnLayout {
             spacing: Theme.abstandS
 
+            // Ohne eingerichteten Zugang gar nicht erst zeigen: ein
+            // ausgegrauter Knopf mit einer Erklärung, die niemanden weiter
+            // bringt, sieht nach kaputt aus.
             RowLayout {
                 Layout.fillWidth: true
                 spacing: Theme.abstandS
+                visible: sets.kiVerfuegbar
 
                 PrimaryButton {
                     implicitHeight: 32
                     Layout.preferredWidth: 200
-                    enabled: sets.kiVerfuegbar && !sets.erkennungLaeuft
+                    enabled: !sets.erkennungLaeuft
                     text: sets.erkennungLaeuft ? "Wird gelesen …" : "Aus PDF oder Datei …"
                     onClicked: dokumentDialog.open()
                 }
@@ -393,9 +397,7 @@ Dialog {
                     wrapMode: Text.WordWrap
                     text: sets.erkennungLaeuft
                           ? "Die Seite wird gelesen, das dauert einen Moment."
-                          : sets.kiVerfuegbar
-                            ? "Buchseite als PDF wählen — die Vokabeln landen unten zum Prüfen."
-                            : "Für den PDF-Import ist kein Zugang eingerichtet."
+                          : "Buchseite als PDF wählen — die Vokabeln landen unten zum Prüfen."
                     color: Theme.textSecondary
                     font.pixelSize: Theme.schriftXs
                 }

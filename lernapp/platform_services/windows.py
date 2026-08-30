@@ -33,6 +33,17 @@ class WindowsDienste(BasisDienste):
         except Exception:
             pass
 
+    def zeige_meldung(self, titel: str, text: str) -> bool:
+        """MessageBoxW — funktioniert auch dann noch, wenn Qt nicht lädt."""
+        try:
+            import ctypes
+
+            # MB_OK | MB_ICONERROR | MB_SETFOREGROUND
+            ctypes.windll.user32.MessageBoxW(0, text, titel, 0x10 | 0x10000)
+            return True
+        except Exception:
+            return False
+
     def unterstuetzt_ton(self) -> bool:
         return _TON
 

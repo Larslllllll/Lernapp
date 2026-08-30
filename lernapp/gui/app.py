@@ -5,6 +5,7 @@ keine Lernlogik.
 """
 from __future__ import annotations
 
+import logging
 import sys
 from pathlib import Path
 
@@ -14,7 +15,9 @@ from PySide6.QtQml import QQmlApplicationEngine
 
 from lernapp import __version__
 from lernapp.platform_services import dienste
+from lernapp.storage import protokoll
 
+from .absturz import installiere_excepthook, setze_hauptfenster
 from .bridge.app_state import AppState
 from .bridge.learning_viewmodel import LearningViewModel
 from .bridge.sets_viewmodel import SetsViewModel
@@ -65,6 +68,13 @@ def _entwicklungsposition(engine: QQmlApplicationEngine) -> None:
 
 
 def run() -> int:
+    # Zuerst das Protokoll: alles, was danach schiefgeht, hinterlaesst eine
+    # Spur. Im gebauten Bundle gibt es keine Konsole, auf der ein Traceback
+    # sonst landen koennte.
+    log_pfad = protokoll.richte_logging_ein()
+    installiere_excepthook(log_pfad)
+    protokoll.notiere_start(__version__)
+
     dienste().beim_start()
 
     app = QGuiApplication(sys.argv)
@@ -89,8 +99,14 @@ def run() -> int:
 
     engine.load(QUrl.fromLocalFile(str(QML_DIR / "Main.qml")))
     if not engine.rootObjects():
+        logging.getLogger(protokoll.LOGGER_NAME).critical(
+            "Main.qml konnte nicht geladen werden")
         print("Main.qml konnte nicht geladen werden.", file=sys.stderr)
         return 1
+
+    # Ab jetzt gibt es ein Elternfenster - erst damit wird ein Fehlerdialog
+    # ueberhaupt sichtbar (siehe absturz.py).
+    setze_hauptfenster(engine.rootObjects()[0])
 
     _entwicklungsposition(engine)
 
@@ -109,4 +125,7 @@ def run() -> int:
 
     sets.lernsetGewaehlt.connect(_merke_lernset)
 
-    return app.exec()
+    code = app.exec()
+    logging.getLogger(protokoll.LOGGER_NAME).info("Beendet mit Code %d", code)
+    protokoll.beende_logging()
+    return code

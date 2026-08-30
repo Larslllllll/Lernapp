@@ -34,6 +34,8 @@ class PlattformDienste(Protocol):
 
     def beim_start(self) -> None: ...
 
+    def zeige_meldung(self, titel: str, text: str) -> bool: ...
+
 
 class BasisDienste:
     """Neutrale Grundimplementierung - tut nichts, schlaegt nie fehl."""
@@ -49,6 +51,15 @@ class BasisDienste:
     def beim_start(self) -> None:
         """Einmalige Einrichtung vor dem ersten Fenster. Standard: nichts."""
         return None
+
+    def zeige_meldung(self, titel: str, text: str) -> bool:
+        """Meldung ohne Qt anzeigen. Standard: geht nicht, sagt es ehrlich.
+
+        Gedacht als letzter Ausweg für Abstürze, bei denen Qt selbst nicht
+        mehr steht — im gebauten Bundle gibt es keine Konsole, auf der eine
+        Meldung sonst landen könnte.
+        """
+        return False
 
     def datenverzeichnis(self) -> Path:
         from lernapp.storage import paths

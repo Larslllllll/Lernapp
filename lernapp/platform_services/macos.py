@@ -15,6 +15,12 @@ _RICHTIG = "/System/Library/Sounds/Tink.aiff"
 _FALSCH = "/System/Library/Sounds/Basso.aiff"
 
 
+def _as_literal(text: str) -> str:
+    """AppleScript-String. Backslash und Anführungszeichen maskieren."""
+    maskiert = text.replace(chr(92), chr(92) * 2).replace('"', chr(92) + '"')
+    return '"' + maskiert + '"'
+
+
 class MacDienste(BasisDienste):
     name = "macos"
 
@@ -26,6 +32,18 @@ class MacDienste(BasisDienste):
         kollidiert, wird sie hier - und nur hier - ueberschrieben.
         """
         return super().tastenkuerzel()
+
+    def zeige_meldung(self, titel: str, text: str) -> bool:
+        """osascript — ohne Zusatzpakete verfügbar. Ungetestet (keine Hardware)."""
+        skript = (f'display dialog {_as_literal(text)} '
+                  f'with title {_as_literal(titel)} '
+                  'buttons {"OK"} default button "OK" with icon caution')
+        try:
+            subprocess.run(["osascript", "-e", skript], check=False,
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            return True
+        except Exception:
+            return False
 
     def unterstuetzt_ton(self) -> bool:
         return Path(_RICHTIG).exists()

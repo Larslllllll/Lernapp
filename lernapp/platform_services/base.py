@@ -36,6 +36,12 @@ class PlattformDienste(Protocol):
 
     def zeige_meldung(self, titel: str, text: str) -> bool: ...
 
+    def speichere_geheimnis(self, name: str, wert: str) -> bool: ...
+
+    def lies_geheimnis(self, name: str) -> str | None: ...
+
+    def loesche_geheimnis(self, name: str) -> None: ...
+
 
 class BasisDienste:
     """Neutrale Grundimplementierung - tut nichts, schlägt nie fehl."""
@@ -65,6 +71,23 @@ class BasisDienste:
         from lernapp.storage import paths
 
         return paths.datenverzeichnis()
+
+    # -- Geheimnisse ----------------------------------------------------------
+    #
+    # Ein GitHub-Token ist ein Passwort. Er gehört nicht im Klartext neben die
+    # Vokabeln, sondern in die Verschlüsselung des Betriebssystems. Wo es die
+    # nicht gibt, wird bewusst NICHTS gespeichert: dann meldet man sich eben
+    # jedes Mal neu an. Das ist unbequem, aber ehrlich.
+
+    def speichere_geheimnis(self, name: str, wert: str) -> bool:
+        """True, wenn dauerhaft und geschützt abgelegt wurde."""
+        return False
+
+    def lies_geheimnis(self, name: str) -> str | None:
+        return None
+
+    def loesche_geheimnis(self, name: str) -> None:
+        return None
 
     def tastenkuerzel(self) -> dict[str, str]:
         """Aktionsname -> Qt-Tastenfolge.

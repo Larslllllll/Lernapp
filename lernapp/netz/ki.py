@@ -21,12 +21,17 @@ import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
+from pathlib import Path
 
 ZEITLIMIT = 120
 
 # Bekannte Anbieter als Abkürzung. Alles andere geht über LERNAPP_KI_BASIS.
 ANBIETER = {
-    "nous": ("https://inference-api.nousresearch.com/v1", "Hermes-4-70B"),
+    # Gratis nutzbar und im Vergleich an echten Vokabeln als bestes der
+    # freien Modelle hervorgegangen (6/6 gegen 5/6). Die bezahlten
+    # Modelle des Portals verlangen Guthaben.
+    "nous": ("https://inference-api.nousresearch.com/v1",
+             "inclusionai/ling-3.0-flash-fin:free"),
     "gemini": ("https://generativelanguage.googleapis.com/v1beta/openai",
                "gemini-2.5-flash"),
     "groq": ("https://api.groq.com/openai/v1", "llama-3.3-70b-versatile"),
@@ -51,22 +56,85 @@ class Zugang:
         return bool(self.basis and self.modell and self.schluessel)
 
 
+# Lokale Schluesseldateien, die NICHT im Repo liegen duerfen. Sie werden
+# gelesen, aber nie geschrieben - und echte Umgebungsvariablen haben Vorrang.
+SCHLUESSELDATEIEN = (".NOUS.ENV", ".ki.env")
+
+# Feldnamen, die in solchen Dateien ueblich sind, je Zweck.
+FELDER = {
+    "schluessel": ("LERNAPP_KI_SCHLUESSEL", "NOUS_API_KEY", "OPENAI_API_KEY",
+                   "API_KEY"),
+    "modell": ("LERNAPP_KI_MODELL", "NOUS_MODEL_ID", "MODEL_ID", "MODEL"),
+    "basis": ("LERNAPP_KI_BASIS", "NOUS_BASE_URL", "BASE_URL"),
+}
+
+
+def _aus_datei(wurzel: Path | None = None) -> dict[str, str]:
+    """KEY=VALUE aus einer lokalen Schluesseldatei lesen.
+
+    Bequemlichkeit, damit niemand Schluessel durch die Gegend kopiert. Die
+    Datei gehoert in .gitignore - eine namens .NOUS.ENV war von ".env" und
+    ".env.*" nicht erfasst und lag ungeschuetzt neben dem Quelltext.
+    """
+    # Als Parameter, damit ein Test nicht am Projektverzeichnis hängt.
+    wurzel = wurzel or Path(__file__).resolve().parent.parent.parent
+    gefunden: dict[str, str] = {}
+    for name in SCHLUESSELDATEIEN:
+        datei = wurzel / name
+        if not datei.exists():
+            continue
+        for zeile in datei.read_text(encoding="utf-8", errors="replace").splitlines():
+            zeile = zeile.strip()
+            if not zeile or zeile.startswith("#") or "=" not in zeile:
+                continue
+            schluessel, _, wert = zeile.partition("=")
+            gefunden.setdefault(schluessel.strip().upper(),
+                                wert.strip().strip("\"'"))
+    return gefunden
+
+
+def _wert(zweck: str, datei: dict[str, str], anbieter: str = "") -> str:
+    """Erst die Umgebung, dann die Datei. Anbieterspezifisch geht vor."""
+    namen = FELDER[zweck]
+    if anbieter:
+        namen = (f"{namen[0]}_{anbieter.upper()}", *namen)
+    for name in namen:
+        wert = os.environ.get(name) or datei.get(name)
+        if wert:
+            return wert
+    return ""
+
+
 def aus_umgebung(anbieter: str = "") -> Zugang:
     """Zugang aus den Umgebungsvariablen zusammensetzen.
 
     `anbieter` überschreibt Basis und Modell mit einer bekannten Vorgabe -
     praktisch, um zwei Anbieter nacheinander zu vergleichen.
     """
-    basis, modell = ANBIETER.get(anbieter, ("", ""))
-    basis = basis or os.environ.get("LERNAPP_KI_BASIS", "")
-    modell = os.environ.get("LERNAPP_KI_MODELL", "") if not anbieter else modell
-    modell = modell or os.environ.get("LERNAPP_KI_MODELL", "")
+    datei = _aus_datei()
 
-    # Je Anbieter ein eigener Schlüssel, sonst der allgemeine. So lassen sich
-    # zwei Anbieter vergleichen, ohne dauernd umzusetzen.
-    schluessel = (os.environ.get(f"LERNAPP_KI_SCHLUESSEL_{anbieter.upper()}", "")
-                  if anbieter else "")
-    schluessel = schluessel or os.environ.get("LERNAPP_KI_SCHLUESSEL", "")
+    # Ohne ausdrücklichen Anbieter aus dem Schlüsselnamen schliessen: wer eine
+    # Datei mit NOUS_API_KEY hinlegt, meint Nous und soll nicht zusätzlich
+    # eine Basis-Adresse eintragen müssen.
+    if not anbieter and not _wert("basis", datei):
+        for name in ANBIETER:
+            if os.environ.get(f"{name.upper()}_API_KEY") or datei.get(f"{name.upper()}_API_KEY"):
+                anbieter = name
+                break
+
+    vorgabe_basis, vorgabe_modell = ANBIETER.get(anbieter, ("", ""))
+
+    # Reihenfolge: was ausdrücklich gesetzt ist, schlägt die Vorgabe.
+    basis = _wert("basis", datei, anbieter) or vorgabe_basis
+    modell = _wert("modell", datei, anbieter) or vorgabe_modell
+    schluessel = _wert("schluessel", datei, anbieter)
+
+    # Wer das Modell aus der Weboberfläche kopiert, erwischt den Anzeigenamen
+    # ("Upstage: Solar Pro 4") statt der Kennung ("upstage/solar-pro4"). Die
+    # API antwortet darauf mit einem nichtssagenden 404. Ein Name mit
+    # Leerzeichen ist nie eine Kennung - dann lieber die Vorgabe nehmen.
+    if " " in modell and vorgabe_modell:
+        modell = vorgabe_modell
 
     return Zugang(basis.rstrip("/"), modell, schluessel, anbieter or "eigen")
 

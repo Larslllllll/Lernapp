@@ -3,6 +3,7 @@
 // Anzeige und Speicherformat garantiert zusammenpassen.
 import QtQuick
 import QtQuick.Controls.Basic
+import QtQuick.Dialogs
 import QtQuick.Layouts
 import theme
 import "components"
@@ -43,6 +44,12 @@ Dialog {
             karten.append({ q: daten.items[i].q, a: daten.items[i].a })
         open()
         nameFeld.forceActiveFocus()
+    }
+
+    // Von aussen aufrufbar, damit sich der Einfuege-Dialog auch ohne Klick
+    // oeffnen laesst - gebraucht beim Pruefen der Darstellung.
+    function textImportOeffnen() {
+        textImport.oeffnen()
     }
 
     function kartenAlsListe() {
@@ -334,6 +341,25 @@ Dialog {
 
         readonly property var vorschau: sets.textVorschau(quelle.text)
 
+        // Das Erkannte landet im Einfügefeld, nicht direkt im Lernset - so
+        // sieht der Nutzer jede Zeile in der Vorschau, bevor etwas
+        // gespeichert wird.
+        Connections {
+            target: sets
+            function onVokabelnErkannt(text, zusammenfassung) {
+                if (!textImport.visible) return
+                quelle.text = text
+                quelle.forceActiveFocus()
+            }
+        }
+
+        FileDialog {
+            id: dokumentDialog
+            title: "PDF oder Textdatei wählen"
+            nameFilters: ["Dokumente (*.pdf *.txt *.csv *.tsv *.md)", "Alle Dateien (*)"]
+            onAccepted: sets.ausDokument(selectedFile)
+        }
+
         background: Rectangle {
             color: Theme.background
             radius: Theme.radiusGross
@@ -350,6 +376,30 @@ Dialog {
 
         contentItem: ColumnLayout {
             spacing: Theme.abstandS
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Theme.abstandS
+
+                PrimaryButton {
+                    implicitHeight: 32
+                    Layout.preferredWidth: 200
+                    enabled: sets.kiVerfuegbar && !sets.erkennungLaeuft
+                    text: sets.erkennungLaeuft ? "Wird gelesen …" : "Aus PDF oder Datei …"
+                    onClicked: dokumentDialog.open()
+                }
+                Text {
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    text: sets.erkennungLaeuft
+                          ? "Die Seite wird gelesen, das dauert einen Moment."
+                          : sets.kiVerfuegbar
+                            ? "Buchseite als PDF wählen — die Vokabeln landen unten zum Prüfen."
+                            : "Für den PDF-Import ist kein Zugang eingerichtet."
+                    color: Theme.textSecondary
+                    font.pixelSize: Theme.schriftXs
+                }
+            }
 
             Text {
                 Layout.fillWidth: true

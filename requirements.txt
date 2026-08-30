@@ -8,3 +8,7 @@ PySide6-Essentials==6.11.2
 # Waehrend der Migration: alte Oberflaeche bleibt als Referenz lauffähig.
 # Entfaellt, sobald Qt-Version und Packaging bestaetigt sind.
 customtkinter==5.2.2
+
+# PDF-Import: Text aus einer Buchseite holen. Reines Python,
+# rund 380 KB - faellt im Bundle nicht ins Gewicht.
+pypdf

@@ -14,8 +14,11 @@ from PySide6.QtCore import Property, QObject, QUrl, Signal, Slot
 from lernapp import __version__
 from lernapp.core.cards import TripleCard
 from lernapp.core.import_export import dateiname_fuer, parse_text
+from lernapp.netz import ki, lernset_ki
+from lernapp.storage import dokumente
 from lernapp.storage import local_storage as store
 
+from . import arbeit
 from .app_state import AppState
 
 
@@ -31,11 +34,16 @@ class SetsViewModel(QObject):
     lernsetGewaehlt = Signal(str)
     fehler = Signal(str)
     hinweis = Signal(str)
+    # Ergebnis der Vokabelerkennung: Text im Format der Zwischenablage plus
+    # ein Satz darüber, was erkannt wurde.
+    vokabelnErkannt = Signal(str, str)
+    erkennungGeaendert = Signal()
 
     def __init__(self, state: AppState) -> None:
         super().__init__()
         self._state = state
         self._aktives = ""
+        self._erkennung_laeuft = False
 
     # -- Baum -----------------------------------------------------------------
 
@@ -243,6 +251,49 @@ class SetsViewModel(QObject):
         self.baumGeaendert.emit()
         self.hinweis.emit(f"„{name}“ importiert · {len(items)} Karten")
         return neu["id"]
+
+    # -- Vokabeln aus einem Dokument ------------------------------------------
+
+    @Property(bool, notify=erkennungGeaendert)
+    def erkennungLaeuft(self) -> bool:
+        return self._erkennung_laeuft
+
+    @Property(bool, notify=erkennungGeaendert)
+    def kiVerfuegbar(self) -> bool:
+        """Ohne eingerichteten Zugang bleibt der Knopf aus, statt zu scheitern."""
+        return ki.aus_umgebung().bereit
+
+    @Slot(str)
+    def ausDokument(self, quell_url: str) -> None:
+        """PDF oder Textdatei einlesen und die Vokabeln erkennen lassen.
+
+        Das Ergebnis geht als Text ins vorhandene Einfügefeld - und damit
+        durch dieselbe Vorschau wie ein von Hand eingefügter Text. Ein Modell,
+        das sich irrt, kann so nichts speichern, was der Nutzer nicht gesehen
+        hat.
+        """
+        if self._erkennung_laeuft:
+            return
+        pfad = _pfad_aus(quell_url)
+        self._erkennung_laeuft = True
+        self.erkennungGeaendert.emit()
+
+        def arbeiten():
+            text = dokumente.lies_text(pfad)
+            return lernset_ki.erkenne_vokabeln(ki.aus_umgebung(), text)
+
+        arbeit.starte(arbeiten, self._vokabeln_da, self._erkennung_fehler,
+                      (dokumente.DokumentFehler, ki.KIFehler))
+
+    def _vokabeln_da(self, vorschlag) -> None:
+        self._erkennung_laeuft = False
+        self.erkennungGeaendert.emit()
+        self.vokabelnErkannt.emit(vorschlag.text, vorschlag.zusammenfassung())
+
+    def _erkennung_fehler(self, text: str) -> None:
+        self._erkennung_laeuft = False
+        self.erkennungGeaendert.emit()
+        self.fehler.emit(text)
 
     @Slot(str, result="QVariantMap")
     def textVorschau(self, text: str) -> dict:

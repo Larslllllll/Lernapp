@@ -21,6 +21,11 @@ LernApp-Setup-*.exe
 .playwright-mcp/
 
 # Lokale Nutzerdaten / Secrets
+# Bewusst breit: eine Datei namens .NOUS.ENV war von ".env" und ".env.*"
+# NICHT erfasst und lag ungeschuetzt neben dem Quelltext.
 .env
 .env.*
+*.env
+*.ENV
+*.key
 *.local.json
